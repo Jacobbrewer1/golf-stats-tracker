@@ -69,5 +69,5 @@ jobs:
       - name: Deploy
         uses: WyriHaximus/github-action-helm3@v4
         with:
-          exec: helm upgrade --install golf-stats-${{ inputs.app }} ./charts --values charts/valueFiles/${{ inputs.environment }}/golf-data-${{ inputs.app }}.yaml --set image.tag=${{ steps.get_commit.outputs.sha_short_deploy }}
+          exec: helm upgrade --install golf-stats-${{ inputs.app }} ./charts --values charts/valueFiles/${{ inputs.environment }}/golf-stats-${{ inputs.app }}.yaml --set image.tag=${{ steps.get_commit.outputs.sha_short_deploy }}
           kubeconfig: '${{ steps.import-secrets.outputs.KUBE_CONFIG }}'
