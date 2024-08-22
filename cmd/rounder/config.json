@@ -1,0 +1,23 @@
+{
+  "vault": {
+    "address": "https://vault.bthree.uk",
+    "auth": {
+      "username": "golf-stats",
+      "password": "09841f5e-a55b-476d-b050-7cc9a8272fcc"
+    },
+    "database": {
+      "path": "b3-prod-1-db/creds/readwrite"
+    },
+    "transit": {
+      "path_encrypt": "b3-prod-1-transit/encrypt/b3-prod-1-key",
+      "path_decrypt": "b3-prod-1-transit/decrypt/b3-prod-1-key"
+    }
+  },
+  "database": {
+    "host": "data.bthree.uk:3306",
+    "schema": "golfstats"
+  },
+  "hosts": {
+    "golfdata": "https://api.bthree.uk/golf/v1"
+  }
+}

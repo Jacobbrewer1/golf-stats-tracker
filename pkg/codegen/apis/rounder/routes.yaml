@@ -1,0 +1,347 @@
+openapi: 3.0.0
+info:
+  version: latest
+  title: Golf Data API
+  description: This is the API for the golf data service
+
+paths:
+  /users:
+    post:
+      summary: Create a user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/user'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /login:
+    post:
+      summary: Login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username
+                password:
+                  type: string
+                  description: The password
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/token'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /round/courses:
+    get:
+      summary: Get courses to start a round
+      operationId: getRoundCourses
+      parameters:
+        - $ref: '#/components/parameters/query_name_param'
+      responses:
+        '200':
+          description: A list of courses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/course'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /round/marker/{course_id}:
+    get:
+      summary: Get the marker used for a round
+      operationId: getRoundMarker
+      parameters:
+        - $ref: '#/components/parameters/path_course_id'
+      responses:
+        '200':
+          description: The marker
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/course_details'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+
+components:
+  parameters:
+    path_club_id:
+      name: club_id
+      description: The club id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The club id
+    path_course_id:
+      name: course_id
+      description: The course id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The course id
+    query_name_param:
+      name: name
+      description: The name of the club
+      in: query
+      required: false
+      schema:
+        type: string
+        description: The name of the club to search for
+    query_include_details:
+      name: include_details
+      description: Whether to include course details in the response
+      in: query
+      required: false
+      schema:
+        type: boolean
+        description: Include course details in the response
+
+  schemas:
+    token:
+      type: object
+      properties:
+        token:
+          type: string
+          description: The token
+
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The user id
+        username:
+          type: string
+          description: The username
+        password:
+          type: string
+          description: The password
+        name:
+          type: string
+          description: The name of the user
+
+    round:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The round id
+        course_id:
+          type: integer
+          format: int64
+          description: The course id
+        user_id:
+          type: integer
+          format: int64
+          description: The user id
+
+    club:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Example Golf Club
+        address1:
+          type: string
+          example: 1 Example Street
+        address2:
+          type: string
+          example: Example Town
+        address3:
+          type: string
+          example: Example County
+        city:
+          type: string
+          example: Example City
+        postcode:
+          type: string
+          example: EX1 1MP
+
+    course:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Example Course
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/course_details'
+
+    course_details:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        marker:
+          type: string
+          example: Yellow
+        slope:
+          type: integer
+          format: int64
+          example: 113
+        rating:
+          type: number
+          format: double
+          example: 70.1
+        par_front_nine:
+          type: integer
+          format: int64
+          example: 36
+        par_back_nine:
+          type: integer
+          format: int64
+          example: 36
+        par_total:
+          type: integer
+          format: int64
+          example: 72
+        yardage_front_nine:
+          type: integer
+          format: int64
+          example: 3200
+        yardage_back_nine:
+          type: integer
+          format: int64
+          example: 3200
+        yardage_total:
+          type: integer
+          format: int64
+          example: 6400
+        meters_front_nine:
+          type: integer
+          format: int64
+          example: 2926
+        meters_back_nine:
+          type: integer
+          format: int64
+          example: 2926
+        meters_total:
+          type: integer
+          format: int64
+          example: 5852
+        holes:
+          type: array
+          items:
+            $ref: '#/components/schemas/hole'
+
+    hole:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        number:
+          type: integer
+          format: int64
+          example: 1
+        par:
+          type: integer
+          format: int64
+          example: 4
+        stroke_index:
+          type: integer
+          format: int64
+          example: 15
+        yardage:
+          type: integer
+          format: int64
+          example: 347
+        meters:
+          type: integer
+          format: int64
+          example: 317
+
