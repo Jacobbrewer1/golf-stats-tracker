@@ -20,7 +20,7 @@ on:
         required: true
         type: choice
         options:
-          - 'api'
+          - 'rounder'
 
 jobs:
   build:
