@@ -4,9 +4,11 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
+	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 )
@@ -28,6 +30,7 @@ func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 	// Check the password
 	err = s.checkPassword(r.Context(), password, user.Password)
 	if err != nil {
+		slog.Debug("error checking password", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "invalid username or password")
 		return
 	}
