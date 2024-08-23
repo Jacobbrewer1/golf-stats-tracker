@@ -160,5 +160,12 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 		api.WithErrorHandlerFunc(uhttp.GenericErrorHandler),
 	)
 
+	api.RegisterUnauthedHandlers(
+		r,
+		service,
+		api.WithMetricsMiddleware(metricsMiddleware),
+		api.WithErrorHandlerFunc(uhttp.GenericErrorHandler),
+	)
+
 	return nil
 }
