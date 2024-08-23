@@ -111,9 +111,8 @@ func (s *service) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId a
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrNoHoleStatsFound):
-			slog.Debug("no hole stats found", slog.Int("round_id", round.Id), slog.Int("hole_id", hole.Id))
-			uhttp.NotFoundHandler()(w, r)
-			return
+			stats = new(models.HoleStats)
+			stats.HoleId = hole.Id
 		default:
 			slog.Error("Error getting hole stats", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting hole stats", err)
