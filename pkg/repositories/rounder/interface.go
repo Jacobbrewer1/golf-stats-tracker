@@ -26,6 +26,9 @@ type Repository interface {
 
 	// GetRoundDetailsByRoundId gets the details for a round.
 	GetRoundDetailsByRoundId(roundId int) (*RoundDetails, error)
+
+	// GetRoundsByUserId gets the rounds for a user.
+	GetRoundsByUserId(userId int) ([]*models.Round, error)
 }
 
 type RoundDetails struct {

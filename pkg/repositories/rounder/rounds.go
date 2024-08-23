@@ -71,3 +71,24 @@ func (r *repository) GetRoundDetailsByRoundId(roundId int) (*RoundDetails, error
 		Holes:         holes,
 	}, nil
 }
+
+func (r *repository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
+	sqlStmt := `SELECT id FROM round WHERE user_id = ?`
+
+	var roundIDs []int
+	err := r.db.Select(&roundIDs, sqlStmt, userId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get round IDs: %w", err)
+	}
+
+	rounds := make([]*models.Round, 0, len(roundIDs))
+	for _, id := range roundIDs {
+		round, err := models.RoundById(r.db, id)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get round by ID: %w", err)
+		}
+		rounds = append(rounds, round)
+	}
+
+	return rounds, nil
+}

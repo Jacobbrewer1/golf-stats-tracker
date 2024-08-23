@@ -321,3 +321,37 @@ func (s *service) roundAsModel(rnd *api.RoundCreate, userId int) (*models.Round,
 
 	return r, nil
 }
+
+func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
+	userId := uhttp.UserIdFromContext(r.Context())
+	if userId <= 0 {
+		slog.Debug("user_id not found in context")
+		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "user_id not found in context")
+		return
+	}
+
+	rounds, err := s.r.GetRoundsByUserId(userId)
+	if err != nil {
+		slog.Error("error getting rounds", slog.String(logging.KeyError, err.Error()))
+		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting rounds", err)
+		return
+	}
+
+	respRounds := make([]*api.Round, 0)
+	for _, r := range rounds {
+		respRound, err := s.roundById(r.Id)
+		if err != nil {
+			slog.Error("error getting round by id", slog.String(logging.KeyError, err.Error()))
+			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round by id", err)
+			return
+		}
+
+		respRounds = append(respRounds, respRound)
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, respRounds)
+	if err != nil {
+		slog.Error("error encoding response", slog.String(logging.KeyError, err.Error()))
+		return
+	}
+}

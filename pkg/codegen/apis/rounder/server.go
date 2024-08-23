@@ -17,6 +17,9 @@ type ServerInterface interface {
 	// Login
 	// (POST /login)
 	Login(w http.ResponseWriter, r *http.Request)
+	// Get rounds
+	// (GET /rounds)
+	GetRounds(w http.ResponseWriter, r *http.Request)
 	// Create a round
 	// (POST /rounds)
 	CreateRound(w http.ResponseWriter, r *http.Request)
@@ -86,13 +89,31 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 		}
 	}()
 
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.Login(cw, r)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
+// GetRounds operation middleware
+func (siw *ServerInterfaceWrapper) GetRounds(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
 	if siw.authz != nil {
-		siw.authz.Login(cw, r.WithContext(ctx))
+		siw.authz.GetRounds(cw, r.WithContext(ctx))
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.Login(cw, r)
+		siw.handler.GetRounds(cw, r)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -202,11 +223,6 @@ func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Req
 		}
 	}()
 
-	if siw.authz != nil {
-		siw.authz.CreateUser(cw, r.WithContext(ctx))
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.handler.CreateUser(cw, r)
 	}))
@@ -312,13 +328,32 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 	router.Use(uhttp.AuthHeaderToContextMux())
 	router.Use(uhttp.RequestIDToContextMux())
 
-	router.Methods(http.MethodPost).Path("/login").Handler(wrapHandler(wrapper.Login))
+	router.Methods(http.MethodGet).Path("/rounds").Handler(wrapHandler(wrapper.GetRounds))
 
 	router.Methods(http.MethodPost).Path("/rounds").Handler(wrapHandler(wrapper.CreateRound))
 
 	router.Methods(http.MethodGet).Path("/rounds/new/courses").Handler(wrapHandler(wrapper.GetNewRoundCourses))
 
 	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
+}
 
+// RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
+func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
+	wrapper := ServerInterfaceWrapper{
+		handler: si,
+	}
+
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(&wrapper)
+	}
+
+	router.Use(uhttp.AuthHeaderToContextMux())
+	router.Use(uhttp.RequestIDToContextMux())
+
+	// We do not have a gateway preparer here as no auth is sent.
+	router.Methods(http.MethodPost).Path("/login").Handler(wrapHandler(wrapper.Login))
 	router.Methods(http.MethodPost).Path("/users").Handler(wrapHandler(wrapper.CreateUser))
 }

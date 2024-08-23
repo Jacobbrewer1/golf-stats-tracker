@@ -9,6 +9,7 @@ paths:
     post:
       summary: Create a user
       operationId: createUser
+      x-unauthenticated: true
       requestBody:
         required: true
         content:
@@ -45,6 +46,7 @@ paths:
     post:
       summary: Login
       operationId: login
+      x-unauthenticated: true
       requestBody:
         required: true
         content:
@@ -163,6 +165,30 @@ paths:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
         '404':
           description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+    get:
+      summary: Get rounds
+      operationId: getRounds
+      responses:
+        '200':
+          description: A list of rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/round'
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
