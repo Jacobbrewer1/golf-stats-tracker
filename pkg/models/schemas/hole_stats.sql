@@ -1,6 +1,6 @@
 create table hole_stats
 (
-    id           int          not null,
+    id           int          not null auto_increment,
     hole_id      int          not null,
     score        int          not null,
     fairway_hit  enum ('HIT', 'LEFT', 'RIGHT', 'SHORT', 'LONG') not null,

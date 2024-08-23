@@ -10,7 +10,7 @@ import (
 
 // HoleStats represents a row from 'hole_stats'.
 type HoleStats struct {
-	Id          int       `db:"id,pk"`
+	Id          int       `db:"id,autoinc,pk"`
 	HoleId      int       `db:"hole_id"`
 	Score       int       `db:"score"`
 	FairwayHit  usql.Enum `db:"fairway_hit"`
@@ -29,14 +29,24 @@ func (m *HoleStats) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO hole_stats (" +
-		"`id`, `hole_id`, `score`, `fairway_hit`, `green_hit`, `pin_location`, `putts`, `penalties`" +
+		"`hole_id`, `score`, `fairway_hit`, `green_hit`, `pin_location`, `putts`, `penalties`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?" +
 		")"
 
-	DBLog(sqlstr, m.Id, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
-	_, err := db.Exec(sqlstr, m.Id, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
-	return err
+	DBLog(sqlstr, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
+	res, err := db.Exec(sqlstr, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	m.Id = int(id)
+	return nil
 }
 
 func InsertManyHoleStatss(db DB, ms ...*HoleStats) error {
@@ -48,21 +58,30 @@ func InsertManyHoleStatss(db DB, ms ...*HoleStats) error {
 	defer t.ObserveDuration()
 
 	var sqlstr = "INSERT INTO hole_stats (" +
-		"`id`,`hole_id`,`score`,`fairway_hit`,`green_hit`,`pin_location`,`putts`,`penalties`" +
+		"`hole_id`,`score`,`fairway_hit`,`green_hit`,`pin_location`,`putts`,`penalties`" +
 		") VALUES"
 
 	var args []interface{}
 	for _, m := range ms {
 		sqlstr += " (" +
-			"?,?,?,?,?,?,?,?" +
+			"?,?,?,?,?,?,?" +
 			"),"
-		args = append(args, m.Id, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
+		args = append(args, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
 	}
 
 	DBLog(sqlstr, args...)
-	_, err := db.Exec(sqlstr, args...)
+	res, err := db.Exec(sqlstr, args...)
 	if err != nil {
 		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	for i, m := range ms {
+		m.Id = int(id + int64(i))
 	}
 
 	return nil
@@ -105,15 +124,25 @@ func (m *HoleStats) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO hole_stats (" +
-		"`id`, `hole_id`, `score`, `fairway_hit`, `green_hit`, `pin_location`, `putts`, `penalties`" +
+		"`hole_id`, `score`, `fairway_hit`, `green_hit`, `pin_location`, `putts`, `penalties`" +
 		") VALUES (" +
-		"?, ?, ?, ?, ?, ?, ?, ?" +
+		"?, ?, ?, ?, ?, ?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
 		"`hole_id` = VALUES(`hole_id`), `score` = VALUES(`score`), `fairway_hit` = VALUES(`fairway_hit`), `green_hit` = VALUES(`green_hit`), `pin_location` = VALUES(`pin_location`), `putts` = VALUES(`putts`), `penalties` = VALUES(`penalties`)"
 
-	DBLog(sqlstr, m.Id, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
-	_, err := db.Exec(sqlstr, m.Id, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
-	return err
+	DBLog(sqlstr, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
+	res, err := db.Exec(sqlstr, m.HoleId, m.Score, m.FairwayHit, m.GreenHit, m.PinLocation, m.Putts, m.Penalties)
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	m.Id = int(id)
+	return nil
 }
 
 // Save saves the HoleStats to the database.
