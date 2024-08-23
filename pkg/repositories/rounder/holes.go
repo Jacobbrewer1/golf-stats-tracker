@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	ErrNoHolesFound = errors.New("no holes found")
+	ErrNoHolesFound     = errors.New("no holes found")
+	ErrNoHoleStatsFound = errors.New("no hole stats found")
 )
 
 func (r *repository) CreateHole(hole *models.Hole) error {
@@ -47,4 +48,39 @@ func (r *repository) GetRoundHoles(roundId int) ([]*models.Hole, error) {
 	}
 
 	return holes, nil
+}
+
+func (r *repository) GetHoleStatsByHoleId(holeId int) (*models.HoleStats, error) {
+	sqlStmt := `SELECT id FROM hole_stats WHERE hole_id = ?`
+
+	var id int
+	err := r.db.Get(&id, sqlStmt, holeId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNoHoleStatsFound
+		default:
+			return nil, fmt.Errorf("failed to get hole stats by hole ID: %w", err)
+		}
+	}
+
+	return models.HoleStatsById(r.db, id)
+}
+
+func (r *repository) GetHoleById(id int) (*models.Hole, error) {
+	return models.HoleById(r.db, id)
+}
+
+func (r *repository) SaveHoleStats(holeStats *models.HoleStats) error {
+	err := holeStats.SaveOrUpdate(r.db)
+	if err != nil {
+		switch {
+		case errors.Is(err, models.ErrNoAffectedRows):
+			break
+		default:
+			return fmt.Errorf("failed to save hole stats: %w", err)
+		}
+	}
+
+	return nil
 }

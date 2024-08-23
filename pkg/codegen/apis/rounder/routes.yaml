@@ -228,6 +228,76 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds/{round_id}/holes/{hole_id}/stats:
+    get:
+      summary: Get the stats for a hole
+      operationId: getHoleStats
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+        - $ref: '#/components/parameters/path_hole_id'
+      responses:
+        '200':
+          description: The stats for the hole
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hole_stats'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+    post:
+      summary: Update the stats for a hole
+      operationId: updateHoleStats
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+        - $ref: '#/components/parameters/path_hole_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/hole_stats'
+      responses:
+        '200':
+          description: The stats for the hole
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hole_stats'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
 components:
   parameters:
     path_round_id:
@@ -257,6 +327,15 @@ components:
         type: integer
         format: int64
         description: The course id
+    path_hole_id:
+      name: hole_id
+      description: The hole id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The hole id
     query_name_param:
       name: name
       description: The name of the club
@@ -275,6 +354,29 @@ components:
         description: Include course details in the response
 
   schemas:
+    hole_stats:
+      type: object
+      properties:
+        score:
+          type: integer
+          format: int64
+          description: The number of strokes
+        putts:
+          type: integer
+          format: int64
+          description: The number of putts
+        fairway_hit:
+          $ref: '#/components/schemas/hit_in_regulation'
+        green_hit:
+          $ref: '#/components/schemas/hit_in_regulation'
+        penalties:
+          type: integer
+          format: int64
+          description: The number of penalty strokes
+        pin_location:
+          type: string
+          description: The pin position
+
     token:
       type: object
       properties:
@@ -465,3 +567,11 @@ components:
           format: int64
           example: 317
 
+    hit_in_regulation:
+      type: string
+      enum:
+        - HIT
+        - LEFT
+        - RIGHT
+        - SHORT
+        - LONG

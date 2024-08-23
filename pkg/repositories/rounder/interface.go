@@ -32,6 +32,15 @@ type Repository interface {
 
 	// GetRoundHoles gets the holes for a round.
 	GetRoundHoles(roundId int) ([]*models.Hole, error)
+
+	// GetHoleById gets a hole by its ID.
+	GetHoleById(id int) (*models.Hole, error)
+
+	// GetHoleStatsByHoleId gets the stats for a hole.
+	GetHoleStatsByHoleId(holeId int) (*models.HoleStats, error)
+
+	// SaveHoleStats saves the stats for a hole.
+	SaveHoleStats(holeStats *models.HoleStats) error
 }
 
 type RoundDetails struct {

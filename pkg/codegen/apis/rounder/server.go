@@ -32,6 +32,12 @@ type ServerInterface interface {
 	// Get the holes for a round
 	// (GET /rounds/{round_id}/holes)
 	GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId PathRoundId)
+	// Get the stats for a hole
+	// (GET /rounds/{round_id}/holes/{hole_id}/stats)
+	GetHoleStats(w http.ResponseWriter, r *http.Request, roundId PathRoundId, holeId PathHoleId)
+	// Update the stats for a hole
+	// (POST /rounds/{round_id}/holes/{hole_id}/stats)
+	UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundId PathRoundId, holeId PathHoleId)
 	// Create a user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
@@ -249,6 +255,92 @@ func (siw *ServerInterfaceWrapper) GetRoundHoles(w http.ResponseWriter, r *http.
 	handler.ServeHTTP(cw, r.WithContext(ctx))
 }
 
+// GetHoleStats operation middleware
+func (siw *ServerInterfaceWrapper) GetHoleStats(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// ------------- Path parameter "round_id" -------------
+	var roundId PathRoundId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "round_id", mux.Vars(r)["round_id"], &roundId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "round_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "hole_id" -------------
+	var holeId PathHoleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "hole_id", mux.Vars(r)["hole_id"], &holeId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "hole_id", Err: err})
+		return
+	}
+
+	if siw.authz != nil {
+		siw.authz.GetHoleStats(cw, r.WithContext(ctx), roundId, holeId)
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.GetHoleStats(cw, r, roundId, holeId)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
+// UpdateHoleStats operation middleware
+func (siw *ServerInterfaceWrapper) UpdateHoleStats(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// ------------- Path parameter "round_id" -------------
+	var roundId PathRoundId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "round_id", mux.Vars(r)["round_id"], &roundId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "round_id", Err: err})
+		return
+	}
+
+	// ------------- Path parameter "hole_id" -------------
+	var holeId PathHoleId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "hole_id", mux.Vars(r)["hole_id"], &holeId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "hole_id", Err: err})
+		return
+	}
+
+	if siw.authz != nil {
+		siw.authz.UpdateHoleStats(cw, r.WithContext(ctx), roundId, holeId)
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.UpdateHoleStats(cw, r, roundId, holeId)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
 // CreateUser operation middleware
 func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
@@ -374,6 +466,10 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
 
 	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes").Handler(wrapHandler(wrapper.GetRoundHoles))
+
+	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes/{hole_id}/stats").Handler(wrapHandler(wrapper.GetHoleStats))
+
+	router.Methods(http.MethodPost).Path("/rounds/{round_id}/holes/{hole_id}/stats").Handler(wrapHandler(wrapper.UpdateHoleStats))
 }
 
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.

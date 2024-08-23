@@ -18,6 +18,26 @@ type authz struct {
 	vc   vault.Client
 }
 
+func (a *authz) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId, holeId api.PathHoleId) {
+	r, err := a.WithAuthorization(r)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
+		return
+	}
+
+	a.next.UpdateHoleStats(w, r, roundId, holeId)
+}
+
+func (a *authz) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId, holeId api.PathHoleId) {
+	r, err := a.WithAuthorization(r)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
+		return
+	}
+
+	a.next.GetHoleStats(w, r, roundId, holeId)
+}
+
 func (a *authz) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {

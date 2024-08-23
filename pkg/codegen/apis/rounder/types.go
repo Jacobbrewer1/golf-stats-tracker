@@ -32,6 +32,18 @@ type CourseDetails struct {
 	YardageTotal     *int64   `json:"yardage_total,omitempty"`
 }
 
+// HitInRegulation defines the model for hit_in_regulation.
+type HitInRegulation = string
+
+// List of HitInRegulation
+const (
+	HitInRegulation_HIT   HitInRegulation = "HIT"
+	HitInRegulation_LEFT  HitInRegulation = "LEFT"
+	HitInRegulation_LONG  HitInRegulation = "LONG"
+	HitInRegulation_RIGHT HitInRegulation = "RIGHT"
+	HitInRegulation_SHORT HitInRegulation = "SHORT"
+)
+
 // Hole defines the model for hole.
 type Hole struct {
 	Id          *int64 `json:"id,omitempty"`
@@ -40,6 +52,24 @@ type Hole struct {
 	Par         *int64 `json:"par,omitempty"`
 	StrokeIndex *int64 `json:"stroke_index,omitempty"`
 	Yardage     *int64 `json:"yardage,omitempty"`
+}
+
+// HoleStats defines the model for hole_stats.
+type HoleStats struct {
+	FairwayHit *HitInRegulation `json:"fairway_hit,omitempty"`
+	GreenHit   *HitInRegulation `json:"green_hit,omitempty"`
+
+	// Penalties The number of penalty strokes
+	Penalties *int64 `json:"penalties,omitempty"`
+
+	// PinLocation The pin position
+	PinLocation *string `json:"pin_location,omitempty"`
+
+	// Putts The number of putts
+	Putts *int64 `json:"putts,omitempty"`
+
+	// Score The number of strokes
+	Score *int64 `json:"score,omitempty"`
 }
 
 // Round defines the model for round.
@@ -96,6 +126,9 @@ type User struct {
 // PathCourseId defines the model for path_course_id.
 type PathCourseId = int64
 
+// PathHoleId defines the model for path_hole_id.
+type PathHoleId = int64
+
 // PathRoundId defines the model for path_round_id.
 type PathRoundId = int64
 
@@ -122,6 +155,9 @@ type LoginJSONRequestBody LoginJSONBody
 
 // CreateRoundJSONRequestBody defines body for CreateRound for application/json ContentType.
 type CreateRoundJSONRequestBody = RoundCreate
+
+// UpdateHoleStatsJSONRequestBody defines body for UpdateHoleStats for application/json ContentType.
+type UpdateHoleStatsJSONRequestBody = HoleStats
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = User

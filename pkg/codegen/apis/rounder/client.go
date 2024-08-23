@@ -112,6 +112,14 @@ type ClientInterface interface {
 	// GetRoundHoles request
 	GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetHoleStats request
+	GetHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateHoleStatsWithBody request with any body
+	UpdateHoleStatsWithBody(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateUserWithBody request with any body
 	CreateUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -204,6 +212,42 @@ func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, r
 
 func (c *Client) GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetRoundHolesRequest(c.Server, roundId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetHoleStatsRequest(c.Server, roundId, holeId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateHoleStatsWithBody(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateHoleStatsRequestWithBody(c.Server, roundId, holeId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateHoleStatsRequest(c.Server, roundId, holeId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -462,6 +506,101 @@ func NewGetRoundHolesRequest(server string, roundId PathRoundId) (*http.Request,
 	return req, nil
 }
 
+// NewGetHoleStatsRequest generates requests for GetHoleStats
+func NewGetHoleStatsRequest(server string, roundId PathRoundId, holeId PathHoleId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "hole_id", runtime.ParamLocationPath, holeId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes/%s/stats", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateHoleStatsRequest calls the generic UpdateHoleStats builder with application/json body
+func NewUpdateHoleStatsRequest(server string, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateHoleStatsRequestWithBody(server, roundId, holeId, "application/json", bodyReader)
+}
+
+// NewUpdateHoleStatsRequestWithBody generates requests for UpdateHoleStats with any type of body
+func NewUpdateHoleStatsRequestWithBody(server string, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "hole_id", runtime.ParamLocationPath, holeId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes/%s/stats", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewCreateUserRequest calls the generic CreateUser builder with application/json body
 func NewCreateUserRequest(server string, body CreateUserJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -566,6 +705,14 @@ type ClientWithResponsesInterface interface {
 
 	// GetRoundHolesWithResponse request
 	GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error)
+
+	// GetHoleStatsWithResponse request
+	GetHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*GetHoleStatsResponse, error)
+
+	// UpdateHoleStatsWithBodyWithResponse request with any body
+	UpdateHoleStatsWithBodyWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error)
+
+	UpdateHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error)
 
 	// CreateUserWithBodyWithResponse request with any body
 	CreateUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUserResponse, error)
@@ -719,6 +866,56 @@ func (r GetRoundHolesResponse) StatusCode() int {
 	return 0
 }
 
+type GetHoleStatsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HoleStats
+	JSON400      *externalRef0.ErrorMessage
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetHoleStatsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetHoleStatsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateHoleStatsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HoleStats
+	JSON400      *externalRef0.ErrorMessage
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateHoleStatsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateHoleStatsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateUserResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -812,6 +1009,32 @@ func (c *ClientWithResponses) GetRoundHolesWithResponse(ctx context.Context, rou
 		return nil, err
 	}
 	return ParseGetRoundHolesResponse(rsp)
+}
+
+// GetHoleStatsWithResponse request returning *GetHoleStatsResponse
+func (c *ClientWithResponses) GetHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*GetHoleStatsResponse, error) {
+	rsp, err := c.GetHoleStats(ctx, roundId, holeId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetHoleStatsResponse(rsp)
+}
+
+// UpdateHoleStatsWithBodyWithResponse request with arbitrary body returning *UpdateHoleStatsResponse
+func (c *ClientWithResponses) UpdateHoleStatsWithBodyWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error) {
+	rsp, err := c.UpdateHoleStatsWithBody(ctx, roundId, holeId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateHoleStatsResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error) {
+	rsp, err := c.UpdateHoleStats(ctx, roundId, holeId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateHoleStatsResponse(rsp)
 }
 
 // CreateUserWithBodyWithResponse request with arbitrary body returning *CreateUserResponse
@@ -1065,6 +1288,100 @@ func ParseGetRoundHolesResponse(rsp *http.Response) (*GetRoundHolesResponse, err
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetHoleStatsResponse parses an HTTP response from a GetHoleStatsWithResponse call
+func ParseGetHoleStatsResponse(rsp *http.Response) (*GetHoleStatsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetHoleStatsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HoleStats
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateHoleStatsResponse parses an HTTP response from a UpdateHoleStatsWithResponse call
+func ParseUpdateHoleStatsResponse(rsp *http.Response) (*UpdateHoleStatsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateHoleStatsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HoleStats
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
 		var dest externalRef0.Message
