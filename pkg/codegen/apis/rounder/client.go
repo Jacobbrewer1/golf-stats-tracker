@@ -109,6 +109,9 @@ type ClientInterface interface {
 	// GetNewRoundMarker request
 	GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetRoundHoles request
+	GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateUserWithBody request with any body
 	CreateUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -189,6 +192,18 @@ func (c *Client) GetNewRoundCourses(ctx context.Context, params *GetNewRoundCour
 
 func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetNewRoundMarkerRequest(c.Server, courseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoundHolesRequest(c.Server, roundId)
 	if err != nil {
 		return nil, err
 	}
@@ -413,6 +428,40 @@ func NewGetNewRoundMarkerRequest(server string, courseId PathCourseId) (*http.Re
 	return req, nil
 }
 
+// NewGetRoundHolesRequest generates requests for GetRoundHoles
+func NewGetRoundHolesRequest(server string, roundId PathRoundId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCreateUserRequest calls the generic CreateUser builder with application/json body
 func NewCreateUserRequest(server string, body CreateUserJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -514,6 +563,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetNewRoundMarkerWithResponse request
 	GetNewRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetNewRoundMarkerResponse, error)
+
+	// GetRoundHolesWithResponse request
+	GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error)
 
 	// CreateUserWithBodyWithResponse request with any body
 	CreateUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUserResponse, error)
@@ -643,6 +695,30 @@ func (r GetNewRoundMarkerResponse) StatusCode() int {
 	return 0
 }
 
+type GetRoundHolesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Hole
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoundHolesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoundHolesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
 type CreateUserResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -727,6 +803,15 @@ func (c *ClientWithResponses) GetNewRoundMarkerWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetNewRoundMarkerResponse(rsp)
+}
+
+// GetRoundHolesWithResponse request returning *GetRoundHolesResponse
+func (c *ClientWithResponses) GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error) {
+	rsp, err := c.GetRoundHoles(ctx, roundId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoundHolesResponse(rsp)
 }
 
 // CreateUserWithBodyWithResponse request with arbitrary body returning *CreateUserResponse
@@ -947,6 +1032,46 @@ func ParseGetNewRoundMarkerResponse(rsp *http.Response) (*GetNewRoundMarkerRespo
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoundHolesResponse parses an HTTP response from a GetRoundHolesWithResponse call
+func ParseGetRoundHolesResponse(rsp *http.Response) (*GetRoundHolesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoundHolesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Hole
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest externalRef0.ErrorMessage

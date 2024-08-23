@@ -29,6 +29,9 @@ type ServerInterface interface {
 	// Get the marker used for a round
 	// (GET /rounds/new/marker/{course_id})
 	GetNewRoundMarker(w http.ResponseWriter, r *http.Request, courseId PathCourseId)
+	// Get the holes for a round
+	// (GET /rounds/{round_id}/holes)
+	GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId PathRoundId)
 	// Create a user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
@@ -212,6 +215,40 @@ func (siw *ServerInterfaceWrapper) GetNewRoundMarker(w http.ResponseWriter, r *h
 	handler.ServeHTTP(cw, r.WithContext(ctx))
 }
 
+// GetRoundHoles operation middleware
+func (siw *ServerInterfaceWrapper) GetRoundHoles(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// ------------- Path parameter "round_id" -------------
+	var roundId PathRoundId
+
+	err = runtime.BindStyledParameterWithOptions("simple", "round_id", mux.Vars(r)["round_id"], &roundId, runtime.BindStyledParameterOptions{Explode: false, Required: true})
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "round_id", Err: err})
+		return
+	}
+
+	if siw.authz != nil {
+		siw.authz.GetRoundHoles(cw, r.WithContext(ctx), roundId)
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.GetRoundHoles(cw, r, roundId)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
 // CreateUser operation middleware
 func (siw *ServerInterfaceWrapper) CreateUser(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
@@ -335,6 +372,8 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 	router.Methods(http.MethodGet).Path("/rounds/new/courses").Handler(wrapHandler(wrapper.GetNewRoundCourses))
 
 	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
+
+	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes").Handler(wrapHandler(wrapper.GetRoundHoles))
 }
 
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.

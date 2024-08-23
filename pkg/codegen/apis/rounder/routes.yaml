@@ -200,8 +200,45 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds/{round_id}/holes:
+    get:
+      summary: Get the holes for a round
+      operationId: getRoundHoles
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+      responses:
+        '200':
+          description: A list of holes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/hole'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
 components:
   parameters:
+    path_round_id:
+      name: round_id
+      description: The round id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The round id
     path_club_id:
       name: club_id
       description: The club id

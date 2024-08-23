@@ -96,6 +96,9 @@ type User struct {
 // PathCourseId defines the model for path_course_id.
 type PathCourseId = int64
 
+// PathRoundId defines the model for path_round_id.
+type PathRoundId = int64
+
 // QueryNameParam defines the model for query_name_param.
 type QueryNameParam = string
 
