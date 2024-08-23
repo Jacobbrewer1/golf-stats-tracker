@@ -84,10 +84,10 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
-  /round/courses:
+  /rounds/new/courses:
     get:
       summary: Get courses to start a round
-      operationId: getRoundCourses
+      operationId: getNewRoundCourses
       parameters:
         - $ref: '#/components/parameters/query_name_param'
       responses:
@@ -112,10 +112,10 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
-  /round/marker/{course_id}:
+  /rounds/new/marker/{course_id}:
     get:
       summary: Get the marker used for a round
-      operationId: getRoundMarker
+      operationId: getNewRoundMarker
       parameters:
         - $ref: '#/components/parameters/path_course_id'
       responses:

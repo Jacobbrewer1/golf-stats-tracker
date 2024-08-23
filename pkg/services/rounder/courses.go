@@ -13,7 +13,7 @@ import (
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 )
 
-func (s *service) GetRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetRoundCoursesParams) {
+func (s *service) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetNewRoundCoursesParams) {
 	name := ""
 	if params.Name != nil {
 		name = *params.Name
@@ -70,7 +70,7 @@ func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.C
 	return courses, nil
 }
 
-func (s *service) GetRoundMarker(w http.ResponseWriter, r *http.Request, courseId api.PathCourseId) {
+func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, courseId api.PathCourseId) {
 	marker, err := s.getGolfDataMarker(r.Context(), int(courseId))
 	if err != nil {
 		slog.Error("failed to get marker", slog.String(logging.KeyError, err.Error()))

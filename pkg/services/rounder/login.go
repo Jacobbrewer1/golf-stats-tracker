@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
@@ -16,12 +17,13 @@ import (
 func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 	username, password, ok := r.BasicAuth()
 	if !ok {
+		slog.Debug("basic auth not provided")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "basic auth required")
 		return
 	}
 
 	// Get the user from the database
-	user, err := s.r.UserByUsername(username)
+	user, err := s.r.UserByUsername(strings.ToLower(username))
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting user", err)
 		return

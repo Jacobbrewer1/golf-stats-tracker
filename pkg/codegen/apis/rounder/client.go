@@ -95,11 +95,11 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetRoundCourses request
-	GetRoundCourses(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetNewRoundCourses request
+	GetNewRoundCourses(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetRoundMarker request
-	GetRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetNewRoundMarker request
+	GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateUserWithBody request with any body
 	CreateUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -131,8 +131,8 @@ func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRoundCourses(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetRoundCoursesRequest(c.Server, params)
+func (c *Client) GetNewRoundCourses(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetNewRoundCoursesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +143,8 @@ func (c *Client) GetRoundCourses(ctx context.Context, params *GetRoundCoursesPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetRoundMarkerRequest(c.Server, courseId)
+func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetNewRoundMarkerRequest(c.Server, courseId)
 	if err != nil {
 		return nil, err
 	}
@@ -219,8 +219,8 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	return req, nil
 }
 
-// NewGetRoundCoursesRequest generates requests for GetRoundCourses
-func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*http.Request, error) {
+// NewGetNewRoundCoursesRequest generates requests for GetNewRoundCourses
+func NewGetNewRoundCoursesRequest(server string, params *GetNewRoundCoursesParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -228,7 +228,7 @@ func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*h
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/round/courses")
+	operationPath := fmt.Sprintf("/rounds/new/courses")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -268,8 +268,8 @@ func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*h
 	return req, nil
 }
 
-// NewGetRoundMarkerRequest generates requests for GetRoundMarker
-func NewGetRoundMarkerRequest(server string, courseId PathCourseId) (*http.Request, error) {
+// NewGetNewRoundMarkerRequest generates requests for GetNewRoundMarker
+func NewGetNewRoundMarkerRequest(server string, courseId PathCourseId) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -284,7 +284,7 @@ func NewGetRoundMarkerRequest(server string, courseId PathCourseId) (*http.Reque
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/round/marker/%s", pathParam0)
+	operationPath := fmt.Sprintf("/rounds/new/marker/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -390,11 +390,11 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
-	// GetRoundCoursesWithResponse request
-	GetRoundCoursesWithResponse(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetRoundCoursesResponse, error)
+	// GetNewRoundCoursesWithResponse request
+	GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error)
 
-	// GetRoundMarkerWithResponse request
-	GetRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetRoundMarkerResponse, error)
+	// GetNewRoundMarkerWithResponse request
+	GetNewRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetNewRoundMarkerResponse, error)
 
 	// CreateUserWithBodyWithResponse request with any body
 	CreateUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUserResponse, error)
@@ -427,7 +427,7 @@ func (r LoginResponse) StatusCode() int {
 	return 0
 }
 
-type GetRoundCoursesResponse struct {
+type GetNewRoundCoursesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]Course
@@ -436,7 +436,7 @@ type GetRoundCoursesResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRoundCoursesResponse) Status() string {
+func (r GetNewRoundCoursesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -444,14 +444,14 @@ func (r GetRoundCoursesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRoundCoursesResponse) StatusCode() int {
+func (r GetNewRoundCoursesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetRoundMarkerResponse struct {
+type GetNewRoundMarkerResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CourseDetails
@@ -460,7 +460,7 @@ type GetRoundMarkerResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRoundMarkerResponse) Status() string {
+func (r GetNewRoundMarkerResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -468,7 +468,7 @@ func (r GetRoundMarkerResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRoundMarkerResponse) StatusCode() int {
+func (r GetNewRoundMarkerResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -517,22 +517,22 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
-// GetRoundCoursesWithResponse request returning *GetRoundCoursesResponse
-func (c *ClientWithResponses) GetRoundCoursesWithResponse(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetRoundCoursesResponse, error) {
-	rsp, err := c.GetRoundCourses(ctx, params, reqEditors...)
+// GetNewRoundCoursesWithResponse request returning *GetNewRoundCoursesResponse
+func (c *ClientWithResponses) GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error) {
+	rsp, err := c.GetNewRoundCourses(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRoundCoursesResponse(rsp)
+	return ParseGetNewRoundCoursesResponse(rsp)
 }
 
-// GetRoundMarkerWithResponse request returning *GetRoundMarkerResponse
-func (c *ClientWithResponses) GetRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetRoundMarkerResponse, error) {
-	rsp, err := c.GetRoundMarker(ctx, courseId, reqEditors...)
+// GetNewRoundMarkerWithResponse request returning *GetNewRoundMarkerResponse
+func (c *ClientWithResponses) GetNewRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetNewRoundMarkerResponse, error) {
+	rsp, err := c.GetNewRoundMarker(ctx, courseId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRoundMarkerResponse(rsp)
+	return ParseGetNewRoundMarkerResponse(rsp)
 }
 
 // CreateUserWithBodyWithResponse request with arbitrary body returning *CreateUserResponse
@@ -599,15 +599,15 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 	return response, nil
 }
 
-// ParseGetRoundCoursesResponse parses an HTTP response from a GetRoundCoursesWithResponse call
-func ParseGetRoundCoursesResponse(rsp *http.Response) (*GetRoundCoursesResponse, error) {
+// ParseGetNewRoundCoursesResponse parses an HTTP response from a GetNewRoundCoursesWithResponse call
+func ParseGetNewRoundCoursesResponse(rsp *http.Response) (*GetNewRoundCoursesResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRoundCoursesResponse{
+	response := &GetNewRoundCoursesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -639,15 +639,15 @@ func ParseGetRoundCoursesResponse(rsp *http.Response) (*GetRoundCoursesResponse,
 	return response, nil
 }
 
-// ParseGetRoundMarkerResponse parses an HTTP response from a GetRoundMarkerWithResponse call
-func ParseGetRoundMarkerResponse(rsp *http.Response) (*GetRoundMarkerResponse, error) {
+// ParseGetNewRoundMarkerResponse parses an HTTP response from a GetNewRoundMarkerWithResponse call
+func ParseGetNewRoundMarkerResponse(rsp *http.Response) (*GetNewRoundMarkerResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRoundMarkerResponse{
+	response := &GetNewRoundMarkerResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

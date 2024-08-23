@@ -18,11 +18,11 @@ type ServerInterface interface {
 	// (POST /login)
 	Login(w http.ResponseWriter, r *http.Request)
 	// Get courses to start a round
-	// (GET /round/courses)
-	GetRoundCourses(w http.ResponseWriter, r *http.Request, params GetRoundCoursesParams)
+	// (GET /rounds/new/courses)
+	GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params GetNewRoundCoursesParams)
 	// Get the marker used for a round
-	// (GET /round/marker/{course_id})
-	GetRoundMarker(w http.ResponseWriter, r *http.Request, courseId PathCourseId)
+	// (GET /rounds/new/marker/{course_id})
+	GetNewRoundMarker(w http.ResponseWriter, r *http.Request, courseId PathCourseId)
 	// Create a user
 	// (POST /users)
 	CreateUser(w http.ResponseWriter, r *http.Request)
@@ -95,8 +95,8 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 	handler.ServeHTTP(cw, r.WithContext(ctx))
 }
 
-// GetRoundCourses operation middleware
-func (siw *ServerInterfaceWrapper) GetRoundCourses(w http.ResponseWriter, r *http.Request) {
+// GetNewRoundCourses operation middleware
+func (siw *ServerInterfaceWrapper) GetNewRoundCourses(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
 
@@ -109,7 +109,7 @@ func (siw *ServerInterfaceWrapper) GetRoundCourses(w http.ResponseWriter, r *htt
 	var err error
 
 	// Parameter object where we will unmarshal all parameters from the context
-	var params GetRoundCoursesParams
+	var params GetNewRoundCoursesParams
 
 	// ------------- Optional query parameter "name" -------------
 
@@ -120,19 +120,19 @@ func (siw *ServerInterfaceWrapper) GetRoundCourses(w http.ResponseWriter, r *htt
 	}
 
 	if siw.authz != nil {
-		siw.authz.GetRoundCourses(cw, r.WithContext(ctx), params)
+		siw.authz.GetNewRoundCourses(cw, r.WithContext(ctx), params)
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetRoundCourses(cw, r, params)
+		siw.handler.GetNewRoundCourses(cw, r, params)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
 }
 
-// GetRoundMarker operation middleware
-func (siw *ServerInterfaceWrapper) GetRoundMarker(w http.ResponseWriter, r *http.Request) {
+// GetNewRoundMarker operation middleware
+func (siw *ServerInterfaceWrapper) GetNewRoundMarker(w http.ResponseWriter, r *http.Request) {
 	cw := uhttp.NewClientWriter(w)
 	ctx := r.Context()
 
@@ -154,12 +154,12 @@ func (siw *ServerInterfaceWrapper) GetRoundMarker(w http.ResponseWriter, r *http
 	}
 
 	if siw.authz != nil {
-		siw.authz.GetRoundMarker(cw, r.WithContext(ctx), courseId)
+		siw.authz.GetNewRoundMarker(cw, r.WithContext(ctx), courseId)
 		return
 	}
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetRoundMarker(cw, r, courseId)
+		siw.handler.GetNewRoundMarker(cw, r, courseId)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -288,9 +288,9 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 
 	router.Methods(http.MethodPost).Path("/login").Handler(wrapHandler(wrapper.Login))
 
-	router.Methods(http.MethodGet).Path("/round/courses").Handler(wrapHandler(wrapper.GetRoundCourses))
+	router.Methods(http.MethodGet).Path("/rounds/new/courses").Handler(wrapHandler(wrapper.GetNewRoundCourses))
 
-	router.Methods(http.MethodGet).Path("/round/marker/{course_id}").Handler(wrapHandler(wrapper.GetRoundMarker))
+	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
 
 	router.Methods(http.MethodPost).Path("/users").Handler(wrapHandler(wrapper.CreateUser))
 }

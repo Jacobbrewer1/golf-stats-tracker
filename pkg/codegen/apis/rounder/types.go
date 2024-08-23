@@ -74,8 +74,8 @@ type LoginJSONBody struct {
 	Username *string `json:"username,omitempty"`
 }
 
-// GetRoundCoursesParams defines parameters for GetRoundCourses.
-type GetRoundCoursesParams struct {
+// GetNewRoundCoursesParams defines parameters for GetNewRoundCourses.
+type GetNewRoundCoursesParams struct {
 	// Name The name of the club
 	Name *QueryNameParam `form:"name,omitempty" json:"name,omitempty"`
 }
