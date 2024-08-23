@@ -8,4 +8,7 @@ type Repository interface {
 
 	// UserByUsername returns the user with the given username.
 	UserByUsername(username string) (*models.User, error)
+
+	// CreateRound creates a new round.
+	CreateRound(round *models.Round) error
 }

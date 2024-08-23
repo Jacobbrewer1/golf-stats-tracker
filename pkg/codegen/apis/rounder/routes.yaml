@@ -138,6 +138,41 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds:
+    post:
+      summary: Create a round
+      operationId: createRound
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/round'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/round'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
 
 components:
   parameters:
@@ -212,10 +247,14 @@ components:
           type: integer
           format: int64
           description: The course id
-        user_id:
+        marker_id:
           type: integer
           format: int64
-          description: The user id
+          description: The marker id
+        tee_time:
+          type: string
+          format: date-time
+          description: The tee time
 
     club:
       type: object

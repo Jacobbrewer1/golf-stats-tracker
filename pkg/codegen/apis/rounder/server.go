@@ -17,6 +17,9 @@ type ServerInterface interface {
 	// Login
 	// (POST /login)
 	Login(w http.ResponseWriter, r *http.Request)
+	// Create a round
+	// (POST /rounds)
+	CreateRound(w http.ResponseWriter, r *http.Request)
 	// Get courses to start a round
 	// (GET /rounds/new/courses)
 	GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params GetNewRoundCoursesParams)
@@ -90,6 +93,29 @@ func (siw *ServerInterfaceWrapper) Login(w http.ResponseWriter, r *http.Request)
 
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		siw.handler.Login(cw, r)
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
+// CreateRound operation middleware
+func (siw *ServerInterfaceWrapper) CreateRound(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	if siw.authz != nil {
+		siw.authz.CreateRound(cw, r.WithContext(ctx))
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		siw.handler.CreateRound(cw, r)
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -287,6 +313,8 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 	router.Use(uhttp.RequestIDToContextMux())
 
 	router.Methods(http.MethodPost).Path("/login").Handler(wrapHandler(wrapper.Login))
+
+	router.Methods(http.MethodPost).Path("/rounds").Handler(wrapHandler(wrapper.CreateRound))
 
 	router.Methods(http.MethodGet).Path("/rounds/new/courses").Handler(wrapHandler(wrapper.GetNewRoundCourses))
 

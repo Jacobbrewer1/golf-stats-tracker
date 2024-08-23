@@ -2,7 +2,6 @@ package rounder
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -37,11 +36,16 @@ func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenStr := fmt.Sprintf("%s:%s", user.Username, user.Password)
-	token := base64.StdEncoding.EncodeToString([]byte(tokenStr))
+	mockRequest, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8200/v1/auth/token/lookup-self"), nil)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error creating request", err)
+		return
+	}
+	mockRequest.SetBasicAuth(user.Username, password)
 
 	t := new(api.Token)
-	t.Token = &token
+	// Trim the Basic prefix from the Authorization header
+	t.Token = utils.Ptr(strings.TrimPrefix(mockRequest.Header.Get("Authorization"), "Basic "))
 
 	err = uhttp.Encode(w, http.StatusOK, t)
 	if err != nil {

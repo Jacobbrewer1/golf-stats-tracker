@@ -21,7 +21,7 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := new(api.User)
-	err := uhttp.DecodeJSON(r, user)
+	err := uhttp.DecodeJSONBody(r, user)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error decoding request body", err)
 		return

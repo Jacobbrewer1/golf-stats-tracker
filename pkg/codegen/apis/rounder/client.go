@@ -95,6 +95,11 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CreateRoundWithBody request with any body
+	CreateRoundWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateRound(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetNewRoundCourses request
 	GetNewRoundCourses(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -121,6 +126,30 @@ func (c *Client) LoginWithBody(ctx context.Context, contentType string, body io.
 
 func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewLoginRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateRoundWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateRoundRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateRound(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateRoundRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -200,6 +229,46 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	}
 
 	operationPath := fmt.Sprintf("/login")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCreateRoundRequest calls the generic CreateRound builder with application/json body
+func NewCreateRoundRequest(server string, body CreateRoundJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateRoundRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCreateRoundRequestWithBody generates requests for CreateRound with any type of body
+func NewCreateRoundRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -390,6 +459,11 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
+	// CreateRoundWithBodyWithResponse request with any body
+	CreateRoundWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error)
+
+	CreateRoundWithResponse(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error)
+
 	// GetNewRoundCoursesWithResponse request
 	GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error)
 
@@ -421,6 +495,31 @@ func (r LoginResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r LoginResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateRoundResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *Round
+	JSON400      *externalRef0.ErrorMessage
+	JSON404      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateRoundResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateRoundResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -517,6 +616,23 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
+// CreateRoundWithBodyWithResponse request with arbitrary body returning *CreateRoundResponse
+func (c *ClientWithResponses) CreateRoundWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error) {
+	rsp, err := c.CreateRoundWithBody(ctx, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateRoundResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateRoundWithResponse(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error) {
+	rsp, err := c.CreateRound(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateRoundResponse(rsp)
+}
+
 // GetNewRoundCoursesWithResponse request returning *GetNewRoundCoursesResponse
 func (c *ClientWithResponses) GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error) {
 	rsp, err := c.GetNewRoundCourses(ctx, params, reqEditors...)
@@ -586,6 +702,53 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 			return nil, err
 		}
 		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateRoundResponse parses an HTTP response from a CreateRoundWithResponse call
+func ParseCreateRoundResponse(rsp *http.Response) (*CreateRoundResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateRoundResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest Round
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest externalRef0.ErrorMessage

@@ -13,6 +13,9 @@ const (
 var (
 	// authHeaderKey is the context key to the value of the Authorization HTTP request.
 	authHeaderKey = ContextKey(authHeader)
+
+	// userIdKey is the context key to the value of the user ID.
+	userIdKey = ContextKey("user_id")
 )
 
 // AuthHeaderToContext copies the Authorization HTTP header into the provided context.
@@ -74,4 +77,16 @@ func InternalOnly(next http.Handler) http.HandlerFunc {
 		}
 		next.ServeHTTP(w, r)
 	}
+}
+
+func UserIdFromContext(ctx context.Context) int {
+	v, ok := ctx.Value(userIdKey).(int)
+	if !ok {
+		return -1
+	}
+	return v
+}
+
+func UserIdToContext(ctx context.Context, userId int) context.Context {
+	return context.WithValue(ctx, userIdKey, userId)
 }

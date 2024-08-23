@@ -2,7 +2,6 @@ package rounder
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -62,7 +61,7 @@ func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.C
 	}
 
 	courses := make([]*api.Course, 0)
-	err = json.NewDecoder(resp.Body).Decode(&courses)
+	err = uhttp.DecodeJSON(resp.Body, &courses)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -123,7 +122,7 @@ func (s *service) getGolfDataMarker(ctx context.Context, courseId int) (*api.Cou
 	}
 
 	marker := new(api.Course)
-	err = json.NewDecoder(resp.Body).Decode(marker)
+	err = uhttp.DecodeJSON(resp.Body, marker)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
