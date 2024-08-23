@@ -78,6 +78,7 @@ func (s *service) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId a
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
+			slog.Debug("round not found", slog.Int64("round_id", roundId))
 			uhttp.SendMessageWithStatus(w, http.StatusNotFound, "round not found")
 			return
 		default:
@@ -95,6 +96,7 @@ func (s *service) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId a
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
+			slog.Debug("hole not found", slog.Int("round_id", round.Id), slog.Int64("hole_id", holeId))
 			uhttp.SendMessageWithStatus(w, http.StatusNotFound, "hole not found")
 			return
 		default:
