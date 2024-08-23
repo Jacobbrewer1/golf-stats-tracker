@@ -18,6 +18,16 @@ type authz struct {
 	vc   vault.Client
 }
 
+func (a *authz) CreateRound(w http.ResponseWriter, r *http.Request) {
+	r, err := a.WithAuthorization(r)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
+		return
+	}
+
+	a.next.CreateRound(w, r)
+}
+
 func (a *authz) Login(w http.ResponseWriter, r *http.Request) {
 	a.next.Login(w, r)
 }

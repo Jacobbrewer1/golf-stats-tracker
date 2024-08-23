@@ -44,6 +44,21 @@ type Hole struct {
 
 // Round defines the model for round.
 type Round struct {
+	// CourseName The course name
+	CourseName *string `json:"course_name,omitempty"`
+
+	// Id The round id
+	Id *int64 `json:"id,omitempty"`
+
+	// Marker The marker
+	Marker *string `json:"marker,omitempty"`
+
+	// TeeTime The tee time
+	TeeTime *time.Time `json:"tee_time,omitempty"`
+}
+
+// RoundCreate defines the model for round_create.
+type RoundCreate struct {
 	// CourseId The course id
 	CourseId *int64 `json:"course_id,omitempty"`
 
@@ -103,7 +118,7 @@ type GetNewRoundCoursesParams struct {
 type LoginJSONRequestBody LoginJSONBody
 
 // CreateRoundJSONRequestBody defines body for CreateRound for application/json ContentType.
-type CreateRoundJSONRequestBody = Round
+type CreateRoundJSONRequestBody = RoundCreate
 
 // CreateUserJSONRequestBody defines body for CreateUser for application/json ContentType.
 type CreateUserJSONRequestBody = User

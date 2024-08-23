@@ -147,7 +147,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/round'
+              $ref: '#/components/schemas/round_create'
       responses:
         '201':
           description: Created
@@ -236,7 +236,7 @@ components:
           type: string
           description: The name of the user
 
-    round:
+    round_create:
       type: object
       properties:
         id:
@@ -251,6 +251,24 @@ components:
           type: integer
           format: int64
           description: The marker id
+        tee_time:
+          type: string
+          format: date-time
+          description: The tee time
+
+    round:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The round id
+        course_name:
+          type: string
+          description: The course name
+        marker:
+          type: string
+          description: The marker
         tee_time:
           type: string
           format: date-time
