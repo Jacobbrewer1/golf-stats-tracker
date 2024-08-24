@@ -155,3 +155,72 @@ func (r *repository) CountHolesByRoundAndPar(roundId int, par int64) (int, error
 
 	return count, nil
 }
+
+func (r *repository) GetStatsByUserId(userId int) ([]*HoleWithStats, error) {
+	sqlStmt := `
+	SELECT
+	    r.id AS round_id,
+		s.id AS stats_id
+	FROM hole h
+		INNER JOIN hole_stats s ON h.id = s.hole_id
+		INNER JOIN course_details cd ON h.course_details_id = cd.id
+		INNER JOIN course c ON cd.course_id = c.id
+		INNER JOIN round r ON c.round_id = r.id
+	WHERE r.user_id = ?
+	`
+
+	type idStruct struct {
+		RoundId int `db:"round_id"`
+		StatsId int `db:"stats_id"`
+	}
+
+	ids := make([]idStruct, 0)
+	err := r.db.Select(&ids, sqlStmt, userId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get hole stats: %w", err)
+	}
+
+	holeStats := make([]*HoleWithStats, 0, len(ids))
+	for _, id := range ids {
+		round, err := models.RoundById(r.db, id.RoundId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get round by ID: %w", err)
+		}
+
+		holeStat, err := models.HoleStatsById(r.db, id.StatsId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get hole stats by ID: %w", err)
+		}
+
+		hole, err := holeStat.GetHole(r.db)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get hole by ID: %w", err)
+		}
+
+		holeStats = append(holeStats, &HoleWithStats{
+			Round: round,
+			Hole:  hole,
+			Stats: holeStat,
+		})
+	}
+
+	return holeStats, nil
+}
+
+func (r *repository) CountHolesByRoundId(roundId int) (int, error) {
+	sqlStmt := `
+	SELECT COUNT(*)
+	FROM hole h
+		INNER JOIN course_details cd ON h.course_details_id = cd.id
+		INNER JOIN course c ON cd.course_id = c.id
+	WHERE c.round_id = ?
+	`
+
+	var count int
+	err := r.db.Get(&count, sqlStmt, roundId)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count holes: %w", err)
+	}
+
+	return count, nil
+}

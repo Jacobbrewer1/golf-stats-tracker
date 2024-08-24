@@ -326,6 +326,34 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds/stats/charts/line/averages:
+    get:
+      summary: Get the stats for all rounds
+      operationId: getLineChartAverages
+      parameters:
+        - $ref: '#/components/parameters/query_average_type'
+      responses:
+        '200':
+          description: The stats for all rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/line_data_point'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
 components:
   parameters:
     path_round_id:
@@ -389,6 +417,13 @@ components:
         type: integer
         format: int64
         description: The par of the hole
+    query_average_type:
+      name: average_type
+      description: The type of average
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/average_type'
 
   schemas:
     line_data_point:
@@ -623,3 +658,12 @@ components:
         - SHORT
         - LONG
         - NOT_APPLICABLE
+
+    average_type:
+      type: string
+      enum:
+        - putts
+        - fairway_hit
+        - green_hit
+        - penalties
+      description: The type of average to get

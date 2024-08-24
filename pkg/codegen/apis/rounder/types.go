@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+// AverageType defines the model for average_type.
+type AverageType = string
+
+// List of AverageType
+const (
+	AverageType_fairway_hit AverageType = "fairway_hit"
+	AverageType_green_hit   AverageType = "green_hit"
+	AverageType_penalties   AverageType = "penalties"
+	AverageType_putts       AverageType = "putts"
+)
+
 // Course defines the model for course.
 type Course struct {
 	Details *[]CourseDetails `json:"details,omitempty"`
@@ -142,6 +153,9 @@ type PathHoleId = int64
 // PathRoundId defines the model for path_round_id.
 type PathRoundId = int64
 
+// QueryAverageType defines the model for query_average_type.
+type QueryAverageType = AverageType
+
 // QueryNameParam defines the model for query_name_param.
 type QueryNameParam = string
 
@@ -161,6 +175,12 @@ type LoginJSONBody struct {
 type GetNewRoundCoursesParams struct {
 	// Name The name of the club
 	Name *QueryNameParam `form:"name,omitempty" json:"name,omitempty"`
+}
+
+// GetLineChartAveragesParams defines parameters for GetLineChartAverages.
+type GetLineChartAveragesParams struct {
+	// AverageType The type of average
+	AverageType QueryAverageType `form:"average_type" json:"average_type"`
 }
 
 // GetLineChartScoreAverageParams defines parameters for GetLineChartScoreAverage.
