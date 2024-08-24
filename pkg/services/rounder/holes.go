@@ -250,6 +250,8 @@ func apiAsModelHoleStats(stats *api.HoleStats) (*models.HoleStats, error) {
 
 	if stats.GreenHit == nil {
 		return nil, errors.New("green_hit is required")
+	} else if *stats.GreenHit == api.HitInRegulation_NOT_APPLICABLE {
+		return nil, errors.New("green_hit cannot be NOT_APPLICABLE")
 	}
 	s.GreenHit = usql.NewEnum(*stats.GreenHit)
 
