@@ -107,10 +107,6 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 		}
 	}
 
-	sort.Slice(lineChartData, func(i, j int) bool {
-		return lineChartData[i].Round.TeeTime.Before(lineChartData[j].Round.TeeTime)
-	})
-
 	// Create the response.
 	resp := make([]*api.LineDataPoint, 0)
 	for key, value := range averageScores {
@@ -129,8 +125,12 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 		case api.AverageType_green_hit:
 			// Calculate the percentage.
 			roundedValue = utils.Round((value/float64(len(round.Holes)))*100, 2)
-		default:
-			roundedValue = utils.Round(value, 2)
+		case api.AverageType_putts:
+			// Calculate the average putts per hole.
+			roundedValue = utils.Round(value/float64(len(round.Holes)), 2)
+		case api.AverageType_penalties:
+			// We want to measure the total putts per round
+			roundedValue = value
 		}
 
 		resp = append(resp, &api.LineDataPoint{
