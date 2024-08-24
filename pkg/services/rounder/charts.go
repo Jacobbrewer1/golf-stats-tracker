@@ -96,31 +96,37 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	wg := new(sync.WaitGroup)
 
 	for _, data := range lineChartData {
-		wg.Add(1)
-		go func(data *repo.HoleWithStats) {
-			avgScoresWriter.Lock()
-			switch params.AverageType {
-			case api.AverageType_penalties:
-				averageScores[data.Round.Id] += float64(data.Stats.Penalties)
-			case api.AverageType_putts:
-				averageScores[data.Round.Id] += float64(data.Stats.Putts)
-			case api.AverageType_fairway_hit:
-				if string(data.Stats.FairwayHit) != models.HoleStatsFairwayHitNOTAPPLICABLE {
-					firWriter.Lock()
-					totalFairwayCount[data.Round.Id]++
-					firWriter.Unlock()
+		select {
+		case <-r.Context().Done():
+			slog.Debug("context done", slog.String(logging.KeyError, r.Context().Err().Error()))
+			return
+		default:
+			wg.Add(1)
+			go func(data *repo.HoleWithStats) {
+				avgScoresWriter.Lock()
+				switch params.AverageType {
+				case api.AverageType_penalties:
+					averageScores[data.Round.Id] += float64(data.Stats.Penalties)
+				case api.AverageType_putts:
+					averageScores[data.Round.Id] += float64(data.Stats.Putts)
+				case api.AverageType_fairway_hit:
+					if string(data.Stats.FairwayHit) != models.HoleStatsFairwayHitNOTAPPLICABLE {
+						firWriter.Lock()
+						totalFairwayCount[data.Round.Id]++
+						firWriter.Unlock()
+					}
+					if string(data.Stats.FairwayHit) == models.HoleStatsFairwayHitHIT {
+						averageScores[data.Round.Id]++
+					}
+				case api.AverageType_green_hit:
+					if string(data.Stats.GreenHit) == models.HoleStatsGreenHitHIT {
+						averageScores[data.Round.Id]++
+					}
 				}
-				if string(data.Stats.FairwayHit) == models.HoleStatsFairwayHitHIT {
-					averageScores[data.Round.Id]++
-				}
-			case api.AverageType_green_hit:
-				if string(data.Stats.GreenHit) == models.HoleStatsGreenHitHIT {
-					averageScores[data.Round.Id]++
-				}
-			}
-			avgScoresWriter.Unlock()
-			wg.Done()
-		}(data)
+				avgScoresWriter.Unlock()
+				wg.Done()
+			}(data)
+		}
 	}
 
 	wg.Wait()
@@ -134,39 +140,45 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	// Create the response.
 	resp := make([]*tempResp, 0)
 	for key, value := range averageScores {
-		wg.Add(1)
-		go func(key int, value float64) {
-			round, err := s.r.GetRoundDetailsByRoundId(key)
-			if err != nil {
-				slog.Error("Error getting round", slog.String(logging.KeyError, err.Error()))
-				uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round", err)
-				return
-			}
+		select {
+		case <-r.Context().Done():
+			slog.Debug("context done", slog.String(logging.KeyError, r.Context().Err().Error()))
+			return
+		default:
+			wg.Add(1)
+			go func(key int, value float64) {
+				round, err := s.r.GetRoundDetailsByRoundId(key)
+				if err != nil {
+					slog.Error("Error getting round", slog.String(logging.KeyError, err.Error()))
+					uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round", err)
+					return
+				}
 
-			roundedValue := value
-			switch params.AverageType {
-			case api.AverageType_fairway_hit:
-				// Calculate the percentage.
-				roundedValue = utils.Round((value/float64(totalFairwayCount[round.Round.Id]))*100, 2)
-			case api.AverageType_green_hit:
-				// Calculate the percentage.
-				roundedValue = utils.Round((value/float64(len(round.Holes)))*100, 2)
-			case api.AverageType_putts:
-				// Calculate the average putts per hole.
-				roundedValue = utils.Round(value/float64(len(round.Holes)), 2)
-			case api.AverageType_penalties:
-				// We want to measure the total putts per round
-				roundedValue = value
-			}
+				roundedValue := value
+				switch params.AverageType {
+				case api.AverageType_fairway_hit:
+					// Calculate the percentage.
+					roundedValue = utils.Round((value/float64(totalFairwayCount[round.Round.Id]))*100, 2)
+				case api.AverageType_green_hit:
+					// Calculate the percentage.
+					roundedValue = utils.Round((value/float64(len(round.Holes)))*100, 2)
+				case api.AverageType_putts:
+					// Calculate the average putts per hole.
+					roundedValue = utils.Round(value/float64(len(round.Holes)), 2)
+				case api.AverageType_penalties:
+					// We want to measure the total putts per round
+					roundedValue = value
+				}
 
-			resp = append(resp, &tempResp{
-				teeTime: &round.Round.TeeTime,
-				x:       fmt.Sprintf("%s - %s", round.Course.Name, round.Round.TeeTime.Format(time.DateOnly)),
-				y:       float32(roundedValue),
-			})
+				resp = append(resp, &tempResp{
+					teeTime: &round.Round.TeeTime,
+					x:       fmt.Sprintf("%s - %s", round.Course.Name, round.Round.TeeTime.Format(time.DateOnly)),
+					y:       float32(roundedValue),
+				})
 
-			wg.Done()
-		}(key, value)
+				wg.Done()
+			}(key, value)
+		}
 	}
 
 	wg.Wait()
