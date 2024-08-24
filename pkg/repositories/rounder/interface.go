@@ -41,6 +41,18 @@ type Repository interface {
 
 	// SaveHoleStats saves the stats for a hole.
 	SaveHoleStats(holeStats *models.HoleStats) error
+
+	// GetAllStatsForPar gets all stats for a user.
+	GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats, error)
+
+	// CountHolesByRoundAndPar counts the number of holes for a round and par.
+	CountHolesByRoundAndPar(roundId int, par int64) (int, error)
+}
+
+type HoleWithStats struct {
+	Round *models.Round
+	Hole  *models.Hole
+	Stats *models.HoleStats
 }
 
 type RoundDetails struct {

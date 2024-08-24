@@ -37,11 +37,12 @@ type HitInRegulation = string
 
 // List of HitInRegulation
 const (
-	HitInRegulation_HIT   HitInRegulation = "HIT"
-	HitInRegulation_LEFT  HitInRegulation = "LEFT"
-	HitInRegulation_LONG  HitInRegulation = "LONG"
-	HitInRegulation_RIGHT HitInRegulation = "RIGHT"
-	HitInRegulation_SHORT HitInRegulation = "SHORT"
+	HitInRegulation_HIT            HitInRegulation = "HIT"
+	HitInRegulation_LEFT           HitInRegulation = "LEFT"
+	HitInRegulation_LONG           HitInRegulation = "LONG"
+	HitInRegulation_NOT_APPLICABLE HitInRegulation = "NOT_APPLICABLE"
+	HitInRegulation_RIGHT          HitInRegulation = "RIGHT"
+	HitInRegulation_SHORT          HitInRegulation = "SHORT"
 )
 
 // Hole defines the model for hole.
@@ -70,6 +71,15 @@ type HoleStats struct {
 
 	// Score The number of strokes
 	Score *int64 `json:"score,omitempty"`
+}
+
+// LineDataPoint defines the model for line_data_point.
+type LineDataPoint struct {
+	// X The x-axis label
+	X *string `json:"x,omitempty"`
+
+	// Y The y-axis label
+	Y *float32 `json:"y,omitempty"`
 }
 
 // Round defines the model for round.
@@ -135,6 +145,9 @@ type PathRoundId = int64
 // QueryNameParam defines the model for query_name_param.
 type QueryNameParam = string
 
+// QueryStatsPar defines the model for query_stats_par.
+type QueryStatsPar = int64
+
 // LoginJSONBody defines parameters for Login.
 type LoginJSONBody struct {
 	// Password The password
@@ -148,6 +161,12 @@ type LoginJSONBody struct {
 type GetNewRoundCoursesParams struct {
 	// Name The name of the club
 	Name *QueryNameParam `form:"name,omitempty" json:"name,omitempty"`
+}
+
+// GetLineChartScoreAverageParams defines parameters for GetLineChartScoreAverage.
+type GetLineChartScoreAverageParams struct {
+	// Par The par of the hole
+	Par QueryStatsPar `form:"par" json:"par"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.

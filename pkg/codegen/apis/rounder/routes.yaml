@@ -298,6 +298,34 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds/stats/charts/line/score/average:
+    get:
+      summary: Get the stats for all rounds
+      operationId: getLineChartScoreAverage
+      parameters:
+        - $ref: '#/components/parameters/query_stats_par'
+      responses:
+        '200':
+          description: The stats for all rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/line_data_point'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
 components:
   parameters:
     path_round_id:
@@ -352,8 +380,27 @@ components:
       schema:
         type: boolean
         description: Include course details in the response
+    query_stats_par:
+      name: par
+      description: The par of the hole
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The par of the hole
 
   schemas:
+    line_data_point:
+      type: object
+      properties:
+        x:
+          type: string
+          description: The x-axis label
+        y:
+          type: number
+          description: The y-axis label
+
     hole_stats:
       type: object
       properties:
@@ -575,3 +622,4 @@ components:
         - RIGHT
         - SHORT
         - LONG
+        - NOT_APPLICABLE
