@@ -204,11 +204,12 @@ func (m *HoleStats) GetHole(db DB) (*Hole, error) {
 
 // Valid values for the 'FairwayHit' enum column
 var (
-	HoleStatsFairwayHitHIT   = "HIT"
-	HoleStatsFairwayHitLEFT  = "LEFT"
-	HoleStatsFairwayHitRIGHT = "RIGHT"
-	HoleStatsFairwayHitSHORT = "SHORT"
-	HoleStatsFairwayHitLONG  = "LONG"
+	HoleStatsFairwayHitHIT           = "HIT"
+	HoleStatsFairwayHitLEFT          = "LEFT"
+	HoleStatsFairwayHitRIGHT         = "RIGHT"
+	HoleStatsFairwayHitSHORT         = "SHORT"
+	HoleStatsFairwayHitLONG          = "LONG"
+	HoleStatsFairwayHitNOTAPPLICABLE = "NOT_APPLICABLE"
 )
 
 // Valid values for the 'GreenHit' enum column
