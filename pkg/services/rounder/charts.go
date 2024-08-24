@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sort"
 	"time"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
@@ -43,6 +44,10 @@ func (s *service) GetLineChartScoreAverage(w http.ResponseWriter, r *http.Reques
 		averageScores[key] = value / float64(count)
 	}
 
+	sort.Slice(lineChartData, func(i, j int) bool {
+		return lineChartData[i].Round.TeeTime.Before(lineChartData[j].Round.TeeTime)
+	})
+
 	// Create the response.
 	resp := make([]*api.LineDataPoint, 0)
 	for key, value := range averageScores {
@@ -52,9 +57,11 @@ func (s *service) GetLineChartScoreAverage(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
+		roundedValue := utils.Round(value, 2)
+
 		resp = append(resp, &api.LineDataPoint{
 			X: utils.Ptr(fmt.Sprintf("%s - %s", round.Course.Name, round.Round.TeeTime.Format(time.DateOnly))),
-			Y: utils.Ptr(float32(value)),
+			Y: utils.Ptr(float32(roundedValue)),
 		})
 	}
 
