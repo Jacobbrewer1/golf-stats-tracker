@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sort"
 	"time"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
@@ -62,10 +63,14 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	}
 
 	data := make(map[string]float64)
+	teeTimeMap := make(map[string]time.Time)
 
 	// Fill up the map with the requested data.
 	for _, d := range lineChartData {
 		xVal := fmt.Sprintf("%s - %s", d.Course.Name, d.Round.TeeTime.Format(time.DateOnly))
+		if _, ok := teeTimeMap[xVal]; !ok {
+			teeTimeMap[xVal] = d.Round.TeeTime
+		}
 		switch params.AverageType {
 		case api.AverageType_fairway_hit:
 			data[xVal] += d.Stats.AvgFairwaysHit
@@ -92,6 +97,10 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 			Y: utils.Ptr(float32(value)),
 		})
 	}
+
+	sort.Slice(resp, func(i, j int) bool {
+		return teeTimeMap[*resp[i].X].Before(teeTimeMap[*resp[j].X])
+	})
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
