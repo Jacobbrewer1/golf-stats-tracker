@@ -3,9 +3,11 @@ package rounder
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
+	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
@@ -21,6 +23,7 @@ type authz struct {
 func (a *authz) GetPieChartAverages(w http.ResponseWriter, r *http.Request, params api.GetPieChartAveragesParams) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -31,6 +34,7 @@ func (a *authz) GetPieChartAverages(w http.ResponseWriter, r *http.Request, para
 func (a *authz) GetLineChartAverages(w http.ResponseWriter, r *http.Request, params api.GetLineChartAveragesParams) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -41,6 +45,7 @@ func (a *authz) GetLineChartAverages(w http.ResponseWriter, r *http.Request, par
 func (a *authz) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId, holeId api.PathHoleId) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -51,6 +56,7 @@ func (a *authz) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundId 
 func (a *authz) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId, holeId api.PathHoleId) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -61,6 +67,7 @@ func (a *authz) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId api
 func (a *authz) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId api.PathRoundId) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -71,6 +78,7 @@ func (a *authz) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId ap
 func (a *authz) GetRounds(w http.ResponseWriter, r *http.Request) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -81,6 +89,7 @@ func (a *authz) GetRounds(w http.ResponseWriter, r *http.Request) {
 func (a *authz) CreateRound(w http.ResponseWriter, r *http.Request) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -95,6 +104,7 @@ func (a *authz) Login(w http.ResponseWriter, r *http.Request) {
 func (a *authz) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetNewRoundCoursesParams) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
@@ -105,6 +115,7 @@ func (a *authz) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, param
 func (a *authz) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, courseId api.PathCourseId) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {
+		slog.Debug("failed to authorize request", slog.String(logging.KeyError, err.Error()))
 		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
 		return
 	}
