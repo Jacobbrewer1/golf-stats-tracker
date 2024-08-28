@@ -319,6 +319,8 @@ paths:
         - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/query_average_type'
+        - $ref: '../common/common.yaml#/components/parameters/from_date'
+        - $ref: '../common/common.yaml#/components/parameters/since'
       responses:
         '200':
           description: The stats for all rounds

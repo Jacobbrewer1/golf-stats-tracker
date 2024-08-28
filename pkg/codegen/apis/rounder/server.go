@@ -247,6 +247,22 @@ func (siw *ServerInterfaceWrapper) GetLineChartAverages(w http.ResponseWriter, r
 		return
 	}
 
+	// ------------- Optional query parameter "from_date" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "from_date", r.URL.Query(), &params.FromDate)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "from_date", Err: err})
+		return
+	}
+
+	// ------------- Optional query parameter "since" -------------
+
+	err = runtime.BindQueryParameter("form", true, false, "since", r.URL.Query(), &params.Since)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "since", Err: err})
+		return
+	}
+
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if siw.authz != nil {
 			siw.authz.GetLineChartAverages(cw, r.WithContext(ctx), params)

@@ -33,6 +33,33 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 		}
 	}
 
+	// If both the from_date and since parameters are set, return an error.
+	if params.FromDate != nil && params.Since != nil {
+		err := uhttp.Encode(w, http.StatusBadRequest, "cannot use both from_date and since parameters")
+		if err != nil {
+			slog.Error("Error encoding line chart data", slog.String(logging.KeyError, err.Error()))
+		}
+		return
+	}
+
+	// If the "from_date" parameter is set, filter the data.
+	if params.FromDate != nil {
+		lineChartData = filterByDate(lineChartData, params.FromDate.Time)
+	}
+
+	// If the "since" parameter is set, filter the data.
+	if params.Since != nil {
+		duration, err := time.ParseDuration(*params.Since)
+		if err != nil {
+			uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "invalid duration", err)
+			return
+		}
+
+		// Calculate the date that is "since" the current date.
+		fromDate := time.Now().Add(-duration)
+		lineChartData = filterByDate(lineChartData, fromDate)
+	}
+
 	data := make(map[string]float64)
 
 	// Fill up the map with the requested data.
@@ -70,4 +97,14 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 		slog.Error("Error encoding line chart data", slog.String(logging.KeyError, err.Error()))
 		return
 	}
+}
+
+func filterByDate(data []*repo.RoundWithStats, fromDate time.Time) []*repo.RoundWithStats {
+	filteredData := make([]*repo.RoundWithStats, 0)
+	for _, d := range data {
+		if d.Round.TeeTime.After(fromDate) {
+			filteredData = append(filteredData, d)
+		}
+	}
+	return filteredData
 }

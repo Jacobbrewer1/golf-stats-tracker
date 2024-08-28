@@ -5,6 +5,8 @@ package rounder
 
 import (
 	"time"
+
+	externalRef0 "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/common"
 )
 
 const (
@@ -185,6 +187,12 @@ type GetNewRoundCoursesParams struct {
 type GetLineChartAveragesParams struct {
 	// AverageType The type of average
 	AverageType QueryAverageType `form:"average_type" json:"average_type"`
+
+	// FromDate Filter by date, from date.
+	FromDate *externalRef0.FromDate `form:"from_date,omitempty" json:"from_date,omitempty"`
+
+	// Since Filter by the duration, since the current date. (E.g. 1d, 1w, 1m, 1y)
+	Since *externalRef0.Since `form:"since,omitempty" json:"since,omitempty"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.
