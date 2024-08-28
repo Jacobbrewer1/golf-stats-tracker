@@ -43,7 +43,7 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 
 	mdl, err := s.roundAsModel(rnd, userId)
 	if err != nil {
-		uhttp.SendMessageWithStatus(w, http.StatusBadRequest, "error mapping round to model", err)
+		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error mapping round to model", err)
 		return
 	}
 
@@ -61,6 +61,12 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respRound, err := s.roundById(mdl.Id)
+	if err != nil {
+		slog.Error("error getting round by id", slog.String(logging.KeyError, err.Error()))
+		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round by id", err)
+		return
+	}
+
 	err = uhttp.Encode(w, http.StatusCreated, respRound)
 	if err != nil {
 		slog.Error("error encoding response", slog.String(logging.KeyError, err.Error()))

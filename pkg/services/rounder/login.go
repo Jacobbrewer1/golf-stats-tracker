@@ -36,7 +36,7 @@ func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	mockRequest, err := http.NewRequest(http.MethodPost, fmt.Sprintf("http://localhost:8200/v1/auth/token/lookup-self"), nil)
+	mockRequest, err := http.NewRequest(http.MethodPost, "http://localhost:8200/v1/auth/token/lookup-self", nil)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error creating request", err)
 		return
