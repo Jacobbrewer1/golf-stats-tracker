@@ -166,9 +166,6 @@ type QueryAverageType = AverageType
 // QueryNameParam defines the model for query_name_param.
 type QueryNameParam = string
 
-// QueryStatsPar defines the model for query_stats_par.
-type QueryStatsPar = int64
-
 // LoginJSONBody defines parameters for Login.
 type LoginJSONBody struct {
 	// Password The password
@@ -188,12 +185,6 @@ type GetNewRoundCoursesParams struct {
 type GetLineChartAveragesParams struct {
 	// AverageType The type of average
 	AverageType QueryAverageType `form:"average_type" json:"average_type"`
-}
-
-// GetLineChartScoreAverageParams defines parameters for GetLineChartScoreAverage.
-type GetLineChartScoreAverageParams struct {
-	// Par The par of the hole
-	Par QueryStatsPar `form:"par" json:"par"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.

@@ -112,9 +112,6 @@ type ClientInterface interface {
 	// GetLineChartAverages request
 	GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetLineChartScoreAverage request
-	GetLineChartScoreAverage(ctx context.Context, params *GetLineChartScoreAverageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetRoundHoles request
 	GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -218,18 +215,6 @@ func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, r
 
 func (c *Client) GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetLineChartAveragesRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetLineChartScoreAverage(ctx context.Context, params *GetLineChartScoreAverageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetLineChartScoreAverageRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -547,51 +532,6 @@ func NewGetLineChartAveragesRequest(server string, params *GetLineChartAveragesP
 	return req, nil
 }
 
-// NewGetLineChartScoreAverageRequest generates requests for GetLineChartScoreAverage
-func NewGetLineChartScoreAverageRequest(server string, params *GetLineChartScoreAverageParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/rounds/stats/charts/line/score/average")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "par", runtime.ParamLocationQuery, params.Par); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewGetRoundHolesRequest generates requests for GetRoundHoles
 func NewGetRoundHolesRequest(server string, roundId PathRoundId) (*http.Request, error) {
 	var err error
@@ -826,9 +766,6 @@ type ClientWithResponsesInterface interface {
 	// GetLineChartAveragesWithResponse request
 	GetLineChartAveragesWithResponse(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*GetLineChartAveragesResponse, error)
 
-	// GetLineChartScoreAverageWithResponse request
-	GetLineChartScoreAverageWithResponse(ctx context.Context, params *GetLineChartScoreAverageParams, reqEditors ...RequestEditorFn) (*GetLineChartScoreAverageResponse, error)
-
 	// GetRoundHolesWithResponse request
 	GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error)
 
@@ -986,30 +923,6 @@ func (r GetLineChartAveragesResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetLineChartAveragesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-type GetLineChartScoreAverageResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *[]LineDataPoint
-	JSON401      *externalRef0.Message
-	JSON500      *externalRef0.ErrorMessage
-}
-
-// Status returns HTTPResponse.Status
-func (r GetLineChartScoreAverageResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetLineChartScoreAverageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1183,15 +1096,6 @@ func (c *ClientWithResponses) GetLineChartAveragesWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetLineChartAveragesResponse(rsp)
-}
-
-// GetLineChartScoreAverageWithResponse request returning *GetLineChartScoreAverageResponse
-func (c *ClientWithResponses) GetLineChartScoreAverageWithResponse(ctx context.Context, params *GetLineChartScoreAverageParams, reqEditors ...RequestEditorFn) (*GetLineChartScoreAverageResponse, error) {
-	rsp, err := c.GetLineChartScoreAverage(ctx, params, reqEditors...)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetLineChartScoreAverageResponse(rsp)
 }
 
 // GetRoundHolesWithResponse request returning *GetRoundHolesResponse
@@ -1469,46 +1373,6 @@ func ParseGetLineChartAveragesResponse(rsp *http.Response) (*GetLineChartAverage
 	}
 
 	response := &GetLineChartAveragesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []LineDataPoint
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
-		var dest externalRef0.Message
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON401 = &dest
-
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
-		var dest externalRef0.ErrorMessage
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON500 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetLineChartScoreAverageResponse parses an HTTP response from a GetLineChartScoreAverageWithResponse call
-func ParseGetLineChartScoreAverageResponse(rsp *http.Response) (*GetLineChartScoreAverageResponse, error) {
-	bodyBytes, err := io.ReadAll(rsp.Body)
-	defer func() { _ = rsp.Body.Close() }()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetLineChartScoreAverageResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
