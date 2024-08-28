@@ -12,6 +12,134 @@ type MockRepository struct {
 	mock.Mock
 }
 
+// CountHolesByRoundAndPar provides a mock function with given fields: roundId, par
+func (_m *MockRepository) CountHolesByRoundAndPar(roundId int, par int64) (int, error) {
+	ret := _m.Called(roundId, par)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountHolesByRoundAndPar")
+	}
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, int64) (int, error)); ok {
+		return rf(roundId, par)
+	}
+	if rf, ok := ret.Get(0).(func(int, int64) int); ok {
+		r0 = rf(roundId, par)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(int, int64) error); ok {
+		r1 = rf(roundId, par)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CountHolesByRoundId provides a mock function with given fields: roundId
+func (_m *MockRepository) CountHolesByRoundId(roundId int) (int, error) {
+	ret := _m.Called(roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CountHolesByRoundId")
+	}
+
+	var r0 int
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (int, error)); ok {
+		return rf(roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int) int); ok {
+		r0 = rf(roundId)
+	} else {
+		r0 = ret.Get(0).(int)
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateCourse provides a mock function with given fields: course
+func (_m *MockRepository) CreateCourse(course *models.Course) error {
+	ret := _m.Called(course)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateCourse")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Course) error); ok {
+		r0 = rf(course)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateCourseDetails provides a mock function with given fields: courseDetails
+func (_m *MockRepository) CreateCourseDetails(courseDetails *models.CourseDetails) error {
+	ret := _m.Called(courseDetails)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateCourseDetails")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.CourseDetails) error); ok {
+		r0 = rf(courseDetails)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateHole provides a mock function with given fields: hole
+func (_m *MockRepository) CreateHole(hole *models.Hole) error {
+	ret := _m.Called(hole)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateHole")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Hole) error); ok {
+		r0 = rf(hole)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CreateRound provides a mock function with given fields: round
+func (_m *MockRepository) CreateRound(round *models.Round) error {
+	ret := _m.Called(round)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateRound")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.Round) error); ok {
+		r0 = rf(round)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // CreateUser provides a mock function with given fields: user
 func (_m *MockRepository) CreateUser(user *models.User) error {
 	ret := _m.Called(user)
@@ -23,6 +151,456 @@ func (_m *MockRepository) CreateUser(user *models.User) error {
 	var r0 error
 	if rf, ok := ret.Get(0).(func(*models.User) error); ok {
 		r0 = rf(user)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// GetAllStatsForPar provides a mock function with given fields: userId, par
+func (_m *MockRepository) GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats, error) {
+	ret := _m.Called(userId, par)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetAllStatsForPar")
+	}
+
+	var r0 []*HoleWithStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, int64) ([]*HoleWithStats, error)); ok {
+		return rf(userId, par)
+	}
+	if rf, ok := ret.Get(0).(func(int, int64) []*HoleWithStats); ok {
+		r0 = rf(userId, par)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*HoleWithStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int, int64) error); ok {
+		r1 = rf(userId, par)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetHoleById provides a mock function with given fields: id
+func (_m *MockRepository) GetHoleById(id int) (*models.Hole, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetHoleById")
+	}
+
+	var r0 *models.Hole
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (*models.Hole, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(int) *models.Hole); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Hole)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetHoleStatsByHoleId provides a mock function with given fields: holeId
+func (_m *MockRepository) GetHoleStatsByHoleId(holeId int) (*models.HoleStats, error) {
+	ret := _m.Called(holeId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetHoleStatsByHoleId")
+	}
+
+	var r0 *models.HoleStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (*models.HoleStats, error)); ok {
+		return rf(holeId)
+	}
+	if rf, ok := ret.Get(0).(func(int) *models.HoleStats); ok {
+		r0 = rf(holeId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.HoleStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(holeId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundById provides a mock function with given fields: id
+func (_m *MockRepository) GetRoundById(id int) (*models.Round, error) {
+	ret := _m.Called(id)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundById")
+	}
+
+	var r0 *models.Round
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (*models.Round, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(int) *models.Round); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.Round)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundDetailsByRoundId provides a mock function with given fields: roundId
+func (_m *MockRepository) GetRoundDetailsByRoundId(roundId int) (*RoundDetails, error) {
+	ret := _m.Called(roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundDetailsByRoundId")
+	}
+
+	var r0 *RoundDetails
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (*RoundDetails, error)); ok {
+		return rf(roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int) *RoundDetails); ok {
+		r0 = rf(roundId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*RoundDetails)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundHitStats provides a mock function with given fields: roundId
+func (_m *MockRepository) GetRoundHitStats(roundId int) ([]*models.RoundHitStats, error) {
+	ret := _m.Called(roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundHitStats")
+	}
+
+	var r0 []*models.RoundHitStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+		return rf(roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+		r0 = rf(roundId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.RoundHitStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundHitStatsByRoundStatsId provides a mock function with given fields: roundStatsId
+func (_m *MockRepository) GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models.RoundHitStats, error) {
+	ret := _m.Called(roundStatsId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundHitStatsByRoundStatsId")
+	}
+
+	var r0 []*models.RoundHitStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+		return rf(roundStatsId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+		r0 = rf(roundStatsId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.RoundHitStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundStatsId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundHoles provides a mock function with given fields: roundId
+func (_m *MockRepository) GetRoundHoles(roundId int) ([]*models.Hole, error) {
+	ret := _m.Called(roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundHoles")
+	}
+
+	var r0 []*models.Hole
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*models.Hole, error)); ok {
+		return rf(roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*models.Hole); ok {
+		r0 = rf(roundId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Hole)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundStatsByRoundId provides a mock function with given fields: roundId
+func (_m *MockRepository) GetRoundStatsByRoundId(roundId int) (*models.RoundStats, error) {
+	ret := _m.Called(roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundStatsByRoundId")
+	}
+
+	var r0 *models.RoundStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) (*models.RoundStats, error)); ok {
+		return rf(roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int) *models.RoundStats); ok {
+		r0 = rf(roundId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.RoundStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetRoundsByUserId provides a mock function with given fields: userId
+func (_m *MockRepository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
+	ret := _m.Called(userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetRoundsByUserId")
+	}
+
+	var r0 []*models.Round
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*models.Round, error)); ok {
+		return rf(userId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*models.Round); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.Round)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetStatsByRoundId provides a mock function with given fields: userId, roundId
+func (_m *MockRepository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error) {
+	ret := _m.Called(userId, roundId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStatsByRoundId")
+	}
+
+	var r0 []*HoleWithStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, int) ([]*HoleWithStats, error)); ok {
+		return rf(userId, roundId)
+	}
+	if rf, ok := ret.Get(0).(func(int, int) []*HoleWithStats); ok {
+		r0 = rf(userId, roundId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*HoleWithStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(userId, roundId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetStatsByUserId provides a mock function with given fields: userId
+func (_m *MockRepository) GetStatsByUserId(userId int) ([]*RoundWithStats, error) {
+	ret := _m.Called(userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetStatsByUserId")
+	}
+
+	var r0 []*RoundWithStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*RoundWithStats, error)); ok {
+		return rf(userId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*RoundWithStats); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*RoundWithStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetUserHitStats provides a mock function with given fields: userId
+func (_m *MockRepository) GetUserHitStats(userId int) ([]*models.RoundHitStats, error) {
+	ret := _m.Called(userId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetUserHitStats")
+	}
+
+	var r0 []*models.RoundHitStats
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+		return rf(userId)
+	}
+	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+		r0 = rf(userId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*models.RoundHitStats)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) error); ok {
+		r1 = rf(userId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// SaveHoleStats provides a mock function with given fields: holeStats
+func (_m *MockRepository) SaveHoleStats(holeStats *models.HoleStats) error {
+	ret := _m.Called(holeStats)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveHoleStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.HoleStats) error); ok {
+		r0 = rf(holeStats)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SaveRoundHitStats provides a mock function with given fields: roundHitStats
+func (_m *MockRepository) SaveRoundHitStats(roundHitStats ...*models.RoundHitStats) error {
+	_va := make([]interface{}, len(roundHitStats))
+	for _i := range roundHitStats {
+		_va[_i] = roundHitStats[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveRoundHitStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(...*models.RoundHitStats) error); ok {
+		r0 = rf(roundHitStats...)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// SaveRoundStats provides a mock function with given fields: roundStats
+func (_m *MockRepository) SaveRoundStats(roundStats *models.RoundStats) error {
+	ret := _m.Called(roundStats)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SaveRoundStats")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(*models.RoundStats) error); ok {
+		r0 = rf(roundStats)
 	} else {
 		r0 = ret.Error(0)
 	}
