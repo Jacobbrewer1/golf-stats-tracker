@@ -67,16 +67,44 @@ create table hole
 
 create table hole_stats
 (
-    id           int                                            not null
+    id           int auto_increment
         primary key,
-    hole_id      int                                            not null,
-    score        int                                            not null,
-    fairway_hit  enum ('HIT', 'LEFT', 'RIGHT', 'SHORT', 'LONG') not null,
-    green_hit    enum ('HIT', 'LEFT', 'RIGHT', 'SHORT', 'LONG') not null,
-    pin_location varchar(100)                                   not null,
-    putts        int                                            not null,
-    penalties    int                                            not null,
+    hole_id      int                                                              not null,
+    score        int                                                              not null,
+    fairway_hit  enum ('HIT', 'LEFT', 'RIGHT', 'SHORT', 'LONG', 'NOT_APPLICABLE') not null,
+    green_hit    enum ('HIT', 'LEFT', 'RIGHT', 'SHORT', 'LONG')                   not null,
+    pin_location varchar(100)                                                     not null,
+    putts        int                                                              not null,
+    penalties    int                                                              not null,
     constraint hole_stats_hole_id_fk
         foreign key (hole_id) references hole (id)
+);
+
+create table round_stats
+(
+    id               int auto_increment
+        primary key,
+    round_id         int           not null,
+    avg_fairways_hit decimal(5, 2) not null,
+    avg_greens_hit   decimal(5, 2) not null,
+    avg_putts        decimal(5, 2) not null,
+    penalties        int           not null,
+    avg_par_3        decimal(5, 2) not null,
+    avg_par_4        decimal(5, 2) not null,
+    avg_par_5        decimal(5, 2) not null,
+    constraint round_stats_round_id_fk
+        foreign key (round_id) references round (id)
+);
+
+create table round_hit_stats
+(
+    id             int auto_increment
+        primary key,
+    round_stats_id int                       not null,
+    type           enum ('GREEN', 'FAIRWAY') not null,
+    miss           varchar(15)               not null,
+    count          int                       not null,
+    constraint round_hit_stats_round_stats_id_fk
+        foreign key (round_stats_id) references round_stats (id)
 );
 
