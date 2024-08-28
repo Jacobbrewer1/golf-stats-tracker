@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"sync"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
@@ -211,7 +212,7 @@ func (s *service) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundI
 	}
 
 	// Is there any difference between the existing stats and the new stats?
-	opts := cmpopts.IgnoreFields(models.HoleStats{}, "Id")
+	opts := cmpopts.IgnoreFields(models.HoleStats{}, "Id", "HoleId")
 	if diff := cmp.Diff(stats, newStats, opts); diff == "" {
 		slog.Debug("hole stats are the same", slog.Int("round_id", round.Id), slog.Int("hole_id", hole.Id))
 	} else {
@@ -312,6 +313,108 @@ func (s *service) calculateStats(userId int, roundId int) error {
 	err = s.r.SaveRoundStats(m)
 	if err != nil {
 		return fmt.Errorf("error saving round stats: %w", err)
+	}
+
+	err = s.calculatePieStats(roundId)
+	if err != nil {
+		return fmt.Errorf("error calculating pie stats: %w", err)
+	}
+
+	return nil
+}
+
+func (s *service) calculatePieStats(roundId int) error {
+	holes, err := s.r.GetRoundHoles(roundId)
+	if err != nil {
+		return fmt.Errorf("error getting holes: %w", err)
+	}
+
+	roundStats, err := s.r.GetRoundStatsByRoundId(roundId)
+	if err != nil {
+		return fmt.Errorf("error getting round stats: %w", err)
+	}
+
+	fairwayData := make(map[string]int)
+	greenData := make(map[string]int)
+
+	for _, h := range holes {
+		stats, err := s.r.GetHoleStatsByHoleId(h.Id)
+		if err != nil {
+			return fmt.Errorf("error getting hole stats: %w", err)
+		}
+
+		fairwayData[string(stats.FairwayHit)] += 1
+		greenData[string(stats.GreenHit)] += 1
+	}
+
+	currentHitStats, err := s.r.GetRoundHitStatsByRoundStatsId(roundId)
+	if err != nil {
+		return fmt.Errorf("error getting current hit stats: %w", err)
+	}
+
+	fairwayHitStatIds := make(map[string]int)
+	greenHitStatIds := make(map[string]int)
+
+	for _, hitStat := range currentHitStats {
+		switch string(hitStat.Type) {
+		case models.RoundHitStatsTypeFAIRWAY:
+			fairwayHitStatIds[hitStat.Miss] = hitStat.Id
+		case models.RoundHitStatsTypeGREEN:
+			greenHitStatIds[hitStat.Miss] = hitStat.Id
+		}
+	}
+
+	wg := new(sync.WaitGroup)
+	fairwayModel := make([]*models.RoundHitStats, 0)
+	wg.Add(1)
+	go func() {
+		for k, v := range fairwayData {
+			id := 0
+			if val, ok := fairwayHitStatIds[k]; ok {
+				id = val
+			}
+
+			fairwayModel = append(fairwayModel, &models.RoundHitStats{
+				Id:           id,
+				Type:         usql.NewEnum(models.RoundHitStatsTypeFAIRWAY),
+				Miss:         k,
+				Count:        v,
+				RoundStatsId: roundStats.Id,
+			})
+		}
+		wg.Done()
+	}()
+
+	greenModel := make([]*models.RoundHitStats, 0)
+	wg.Add(1)
+	go func() {
+		for k, v := range greenData {
+			id := 0
+			if val, ok := greenHitStatIds[k]; ok {
+				id = val
+			}
+
+			greenModel = append(greenModel, &models.RoundHitStats{
+				Id:           id,
+				Type:         usql.NewEnum(models.RoundHitStatsTypeGREEN),
+				Miss:         k,
+				Count:        v,
+				RoundStatsId: roundStats.Id,
+			})
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	err = s.r.SaveRoundHitStats(fairwayModel...)
+	if err != nil {
+		return fmt.Errorf("error saving fairway stats: %w", err)
+	}
+
+	err = s.r.SaveRoundHitStats(greenModel...)
+	if err != nil {
+		return fmt.Errorf("error saving green stats: %w", err)
 	}
 
 	return nil

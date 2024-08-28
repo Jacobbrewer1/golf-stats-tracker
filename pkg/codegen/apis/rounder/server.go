@@ -32,6 +32,9 @@ type ServerInterface interface {
 	// Get the stats for all rounds
 	// (GET /rounds/stats/charts/line/averages)
 	GetLineChartAverages(w http.ResponseWriter, r *http.Request, params GetLineChartAveragesParams)
+	// Get the stats for all rounds
+	// (GET /rounds/stats/charts/pie/averages)
+	GetPieChartAverages(w http.ResponseWriter, r *http.Request, params GetPieChartAveragesParams)
 	// Get the holes for a round
 	// (GET /rounds/{round_id}/holes)
 	GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId PathRoundId)
@@ -266,6 +269,47 @@ func (siw *ServerInterfaceWrapper) GetLineChartAverages(w http.ResponseWriter, r
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if siw.authz != nil {
 			siw.authz.GetLineChartAverages(cw, r.WithContext(ctx), params)
+			return
+		}
+	}))
+
+	handler.ServeHTTP(cw, r.WithContext(ctx))
+}
+
+// GetPieChartAverages operation middleware
+func (siw *ServerInterfaceWrapper) GetPieChartAverages(w http.ResponseWriter, r *http.Request) {
+	cw := uhttp.NewClientWriter(w)
+	ctx := r.Context()
+
+	defer func() {
+		if siw.metricsMiddleware != nil {
+			siw.metricsMiddleware(cw, r)
+		}
+	}()
+
+	var err error
+
+	// Parameter object where we will unmarshal all parameters from the context
+	var params GetPieChartAveragesParams
+
+	// ------------- Required query parameter "average_type" -------------
+
+	if paramValue := r.URL.Query().Get("average_type"); paramValue != "" {
+
+	} else {
+		siw.errorHandlerFunc(cw, r, &RequiredParamError{ParamName: "average_type"})
+		return
+	}
+
+	err = runtime.BindQueryParameter("form", true, true, "average_type", r.URL.Query(), &params.AverageType)
+	if err != nil {
+		siw.errorHandlerFunc(cw, r, &InvalidParamFormatError{ParamName: "average_type", Err: err})
+		return
+	}
+
+	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if siw.authz != nil {
+			siw.authz.GetPieChartAverages(cw, r.WithContext(ctx), params)
 			return
 		}
 	}))
@@ -512,6 +556,8 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
 
 	router.Methods(http.MethodGet).Path("/rounds/stats/charts/line/averages").Handler(wrapHandler(wrapper.GetLineChartAverages))
+
+	router.Methods(http.MethodGet).Path("/rounds/stats/charts/pie/averages").Handler(wrapHandler(wrapper.GetPieChartAverages))
 
 	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes").Handler(wrapHandler(wrapper.GetRoundHoles))
 

@@ -27,6 +27,15 @@ const (
 	AverageType_putts       AverageType = "putts"
 )
 
+// ChartDataPoint defines the model for chart_data_point.
+type ChartDataPoint struct {
+	// X The x-axis label
+	X *string `json:"x,omitempty"`
+
+	// Y The y-axis label
+	Y *float32 `json:"y,omitempty"`
+}
+
 // Course defines the model for course.
 type Course struct {
 	Details *[]CourseDetails `json:"details,omitempty"`
@@ -91,15 +100,6 @@ type HoleStats struct {
 
 	// Score The number of strokes
 	Score *int64 `json:"score,omitempty"`
-}
-
-// LineDataPoint defines the model for line_data_point.
-type LineDataPoint struct {
-	// X The x-axis label
-	X *string `json:"x,omitempty"`
-
-	// Y The y-axis label
-	Y *float32 `json:"y,omitempty"`
 }
 
 // Round defines the model for round.
@@ -193,6 +193,12 @@ type GetLineChartAveragesParams struct {
 
 	// Since Filter by the duration, since the current date. (E.g. 1d, 1w, 1m, 1y)
 	Since *externalRef0.Since `form:"since,omitempty" json:"since,omitempty"`
+}
+
+// GetPieChartAveragesParams defines parameters for GetPieChartAverages.
+type GetPieChartAveragesParams struct {
+	// AverageType The type of average
+	AverageType QueryAverageType `form:"average_type" json:"average_type"`
 }
 
 // LoginJSONRequestBody defines body for Login for application/json ContentType.

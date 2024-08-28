@@ -18,6 +18,16 @@ type authz struct {
 	vc   vault.Client
 }
 
+func (a *authz) GetPieChartAverages(w http.ResponseWriter, r *http.Request, params api.GetPieChartAveragesParams) {
+	r, err := a.WithAuthorization(r)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusUnauthorized, "failed to authorize request", err)
+		return
+	}
+
+	a.next.GetPieChartAverages(w, r, params)
+}
+
 func (a *authz) GetLineChartAverages(w http.ResponseWriter, r *http.Request, params api.GetLineChartAveragesParams) {
 	r, err := a.WithAuthorization(r)
 	if err != nil {

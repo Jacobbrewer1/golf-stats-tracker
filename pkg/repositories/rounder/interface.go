@@ -57,8 +57,23 @@ type Repository interface {
 	// SaveRoundStats saves the stats for a round.
 	SaveRoundStats(roundStats *models.RoundStats) error
 
+	// GetRoundStatsByRoundId gets the stats for a round.
+	GetRoundStatsByRoundId(roundId int) (*models.RoundStats, error)
+
 	// GetStatsByUserId gets all stats for a user.
 	GetStatsByUserId(userId int) ([]*RoundWithStats, error)
+
+	// SaveRoundHitStats saves the hit stats for a round.
+	SaveRoundHitStats(roundHitStats ...*models.RoundHitStats) error
+
+	// GetRoundHitStatsByRoundStatsId gets the hit stats for a round.
+	GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models.RoundHitStats, error)
+
+	// GetRoundHitStats gets the hit stats for a round.
+	GetRoundHitStats(roundId int) ([]*models.RoundHitStats, error)
+
+	// GetUserHitStats gets the hit stats for a user.
+	GetUserHitStats(userId int) ([]*models.RoundHitStats, error)
 }
 
 type HoleWithStats struct {

@@ -9,6 +9,7 @@ import (
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
+	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
@@ -22,7 +23,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrNoStatsFound):
-			err = uhttp.Encode(w, http.StatusOK, []*api.LineDataPoint{})
+			err = uhttp.Encode(w, http.StatusOK, make([]*api.ChartDataPoint, 0))
 			if err != nil {
 				slog.Error("Error encoding line chart data", slog.String(logging.KeyError, err.Error()))
 			}
@@ -44,7 +45,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 
 	// If the "from_date" parameter is set, filter the data.
 	if params.FromDate != nil {
-		lineChartData = filterByDate(lineChartData, params.FromDate.Time)
+		lineChartData = filterRoundStatsByDate(lineChartData, params.FromDate.Time)
 	}
 
 	// If the "since" parameter is set, filter the data.
@@ -57,7 +58,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 
 		// Calculate the date that is "since" the current date.
 		fromDate := time.Now().Add(-duration)
-		lineChartData = filterByDate(lineChartData, fromDate)
+		lineChartData = filterRoundStatsByDate(lineChartData, fromDate)
 	}
 
 	data := make(map[string]float64)
@@ -84,9 +85,9 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	}
 
 	// Create the response.
-	resp := make([]*api.LineDataPoint, 0)
+	resp := make([]*api.ChartDataPoint, 0)
 	for key, value := range data {
-		resp = append(resp, &api.LineDataPoint{
+		resp = append(resp, &api.ChartDataPoint{
 			X: utils.Ptr(key),
 			Y: utils.Ptr(float32(value)),
 		})
@@ -99,7 +100,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	}
 }
 
-func filterByDate(data []*repo.RoundWithStats, fromDate time.Time) []*repo.RoundWithStats {
+func filterRoundStatsByDate(data []*repo.RoundWithStats, fromDate time.Time) []*repo.RoundWithStats {
 	filteredData := make([]*repo.RoundWithStats, 0)
 	for _, d := range data {
 		if d.Round.TeeTime.After(fromDate) {
@@ -107,4 +108,66 @@ func filterByDate(data []*repo.RoundWithStats, fromDate time.Time) []*repo.Round
 		}
 	}
 	return filteredData
+}
+
+func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, params api.GetPieChartAveragesParams) {
+	userId := uhttp.UserIdFromContext(r.Context())
+
+	// Get the pie chart data.
+	userRounds, err := s.r.GetUserHitStats(userId)
+	if err != nil {
+		switch {
+		case errors.Is(err, repo.ErrNoStatsFound):
+			err = uhttp.Encode(w, http.StatusOK, make([]*api.ChartDataPoint, 0))
+			if err != nil {
+				slog.Error("Error encoding pie chart data", slog.String(logging.KeyError, err.Error()))
+			}
+			return
+		default:
+			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting pie chart data", err)
+			return
+		}
+	}
+
+	data := make(map[string]int)
+
+	hitType := ""
+	switch params.AverageType {
+	case api.AverageType_fairway_hit:
+		hitType = models.RoundHitStatsTypeFAIRWAY
+	case api.AverageType_green_hit:
+		hitType = models.RoundHitStatsTypeGREEN
+	}
+
+	// Fill up the map with the requested data.
+	for _, d := range userRounds {
+		if string(d.Type) != hitType {
+			continue
+		}
+
+		switch params.AverageType {
+		case api.AverageType_fairway_hit:
+			if d.Miss == models.HoleStatsFairwayHitNOTAPPLICABLE {
+				continue
+			}
+			data[d.Miss] += d.Count
+		case api.AverageType_green_hit:
+			data[d.Miss] += d.Count
+		}
+	}
+
+	// Create the response.
+	resp := make([]*api.ChartDataPoint, 0)
+	for key, value := range data {
+		resp = append(resp, &api.ChartDataPoint{
+			X: utils.Ptr(key),
+			Y: utils.Ptr(float32(value)),
+		})
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, resp)
+	if err != nil {
+		slog.Error("Error encoding pie chart data", slog.String(logging.KeyError, err.Error()))
+		return
+	}
 }

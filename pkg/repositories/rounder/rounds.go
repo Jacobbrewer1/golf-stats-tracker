@@ -115,5 +115,10 @@ func (r *repository) SaveRoundStats(roundStats *models.RoundStats) error {
 	}
 
 	roundStats.Id = id
-	return roundStats.Update(r.db)
+	err = roundStats.Update(r.db)
+	if err != nil && !errors.Is(err, models.ErrNoAffectedRows) {
+		return fmt.Errorf("failed to update round stats: %w", err)
+	}
+
+	return nil
 }

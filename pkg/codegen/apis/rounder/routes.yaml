@@ -329,7 +329,37 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/line_data_point'
+                  $ref: '#/components/schemas/chart_data_point'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /rounds/stats/charts/pie/averages:
+    get:
+      summary: Get the stats for all rounds
+      operationId: getPieChartAverages
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/query_average_type'
+      responses:
+        '200':
+          description: The stats for all rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/chart_data_point'
         '401':
           description: Unauthorized
           content:
@@ -415,7 +445,7 @@ components:
         $ref: '#/components/schemas/average_type'
 
   schemas:
-    line_data_point:
+    chart_data_point:
       type: object
       properties:
         x:

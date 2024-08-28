@@ -112,6 +112,9 @@ type ClientInterface interface {
 	// GetLineChartAverages request
 	GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetPieChartAverages request
+	GetPieChartAverages(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetRoundHoles request
 	GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -215,6 +218,18 @@ func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, r
 
 func (c *Client) GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetLineChartAveragesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPieChartAverages(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPieChartAveragesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -564,6 +579,51 @@ func NewGetLineChartAveragesRequest(server string, params *GetLineChartAveragesP
 	return req, nil
 }
 
+// NewGetPieChartAveragesRequest generates requests for GetPieChartAverages
+func NewGetPieChartAveragesRequest(server string, params *GetPieChartAveragesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/stats/charts/pie/averages")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "average_type", runtime.ParamLocationQuery, params.AverageType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetRoundHolesRequest generates requests for GetRoundHoles
 func NewGetRoundHolesRequest(server string, roundId PathRoundId) (*http.Request, error) {
 	var err error
@@ -798,6 +858,9 @@ type ClientWithResponsesInterface interface {
 	// GetLineChartAveragesWithResponse request
 	GetLineChartAveragesWithResponse(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*GetLineChartAveragesResponse, error)
 
+	// GetPieChartAveragesWithResponse request
+	GetPieChartAveragesWithResponse(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*GetPieChartAveragesResponse, error)
+
 	// GetRoundHolesWithResponse request
 	GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error)
 
@@ -940,7 +1003,7 @@ func (r GetNewRoundMarkerResponse) StatusCode() int {
 type GetLineChartAveragesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]LineDataPoint
+	JSON200      *[]ChartDataPoint
 	JSON401      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -955,6 +1018,30 @@ func (r GetLineChartAveragesResponse) Status() string {
 
 // StatusCode returns HTTPResponse.StatusCode
 func (r GetLineChartAveragesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPieChartAveragesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]ChartDataPoint
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPieChartAveragesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPieChartAveragesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -1128,6 +1215,15 @@ func (c *ClientWithResponses) GetLineChartAveragesWithResponse(ctx context.Conte
 		return nil, err
 	}
 	return ParseGetLineChartAveragesResponse(rsp)
+}
+
+// GetPieChartAveragesWithResponse request returning *GetPieChartAveragesResponse
+func (c *ClientWithResponses) GetPieChartAveragesWithResponse(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*GetPieChartAveragesResponse, error) {
+	rsp, err := c.GetPieChartAverages(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPieChartAveragesResponse(rsp)
 }
 
 // GetRoundHolesWithResponse request returning *GetRoundHolesResponse
@@ -1411,7 +1507,47 @@ func ParseGetLineChartAveragesResponse(rsp *http.Response) (*GetLineChartAverage
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []LineDataPoint
+		var dest []ChartDataPoint
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPieChartAveragesResponse parses an HTTP response from a GetPieChartAveragesWithResponse call
+func ParseGetPieChartAveragesResponse(rsp *http.Response) (*GetPieChartAveragesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPieChartAveragesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []ChartDataPoint
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
