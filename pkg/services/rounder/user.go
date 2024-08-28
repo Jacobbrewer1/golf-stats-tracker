@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
@@ -20,7 +21,7 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := new(api.User)
-	err := uhttp.DecodeJSON(r, user)
+	err := uhttp.DecodeJSONBody(r, user)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error decoding request body", err)
 		return
@@ -28,7 +29,7 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	user.Id = nil
 
 	// Ensure that the username is unique
-	_, err = s.r.UserByUsername(*user.Username)
+	_, err = s.r.UserByUsername(strings.ToLower(*user.Username))
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrUserNotFound):
@@ -90,7 +91,7 @@ func (s *service) userAsModel(user api.User) (*models.User, error) {
 	if user.Username == nil {
 		return nil, uhttp.NewHttpError(http.StatusBadRequest, "username is required")
 	}
-	u.Username = *user.Username
+	u.Username = strings.ToLower(*user.Username)
 
 	if user.Password == nil {
 		return nil, uhttp.NewHttpError(http.StatusBadRequest, "password is required")

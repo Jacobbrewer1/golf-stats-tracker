@@ -144,6 +144,7 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 
 	repository := repo.NewRepository(db)
 	service := svc.NewService(repository, vc, v.GetString("hosts.golfdata"))
+	svcAuthz := svc.NewAuthz(service, repository, vc)
 
 	r.HandleFunc("/metrics", uhttp.InternalOnly(promhttp.Handler())).Methods(http.MethodGet)
 	r.HandleFunc("/health", uhttp.InternalOnly(healthHandler(db))).Methods(http.MethodGet)
@@ -152,6 +153,14 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 	r.MethodNotAllowedHandler = uhttp.MethodNotAllowedHandler()
 
 	api.RegisterHandlers(
+		r,
+		service,
+		api.WithAuthorization(svcAuthz),
+		api.WithMetricsMiddleware(metricsMiddleware),
+		api.WithErrorHandlerFunc(uhttp.GenericErrorHandler),
+	)
+
+	api.RegisterUnauthedHandlers(
 		r,
 		service,
 		api.WithMetricsMiddleware(metricsMiddleware),

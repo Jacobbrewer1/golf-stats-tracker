@@ -2,7 +2,6 @@ package rounder
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -13,7 +12,7 @@ import (
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 )
 
-func (s *service) GetRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetRoundCoursesParams) {
+func (s *service) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetNewRoundCoursesParams) {
 	name := ""
 	if params.Name != nil {
 		name = *params.Name
@@ -62,7 +61,7 @@ func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.C
 	}
 
 	courses := make([]*api.Course, 0)
-	err = json.NewDecoder(resp.Body).Decode(&courses)
+	err = uhttp.DecodeJSON(resp.Body, &courses)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
@@ -70,7 +69,7 @@ func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.C
 	return courses, nil
 }
 
-func (s *service) GetRoundMarker(w http.ResponseWriter, r *http.Request, courseId api.PathCourseId) {
+func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, courseId api.PathCourseId) {
 	marker, err := s.getGolfDataMarker(r.Context(), int(courseId))
 	if err != nil {
 		slog.Error("failed to get marker", slog.String(logging.KeyError, err.Error()))
@@ -123,7 +122,7 @@ func (s *service) getGolfDataMarker(ctx context.Context, courseId int) (*api.Cou
 	}
 
 	marker := new(api.Course)
-	err = json.NewDecoder(resp.Body).Decode(marker)
+	err = uhttp.DecodeJSON(resp.Body, marker)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}

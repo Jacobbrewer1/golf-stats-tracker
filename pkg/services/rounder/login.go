@@ -2,10 +2,10 @@ package rounder
 
 import (
 	"context"
-	"encoding/base64"
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
@@ -16,12 +16,13 @@ import (
 func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 	username, password, ok := r.BasicAuth()
 	if !ok {
+		slog.Debug("basic auth not provided")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "basic auth required")
 		return
 	}
 
 	// Get the user from the database
-	user, err := s.r.UserByUsername(username)
+	user, err := s.r.UserByUsername(strings.ToLower(username))
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting user", err)
 		return
@@ -35,11 +36,16 @@ func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tokenStr := fmt.Sprintf("%s:%s", user.Username, user.Password)
-	token := base64.StdEncoding.EncodeToString([]byte(tokenStr))
+	mockRequest, err := http.NewRequest(http.MethodPost, "http://localhost:8200/v1/auth/token/lookup-self", nil)
+	if err != nil {
+		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error creating request", err)
+		return
+	}
+	mockRequest.SetBasicAuth(user.Username, password)
 
 	t := new(api.Token)
-	t.Token = &token
+	// Trim the Basic prefix from the Authorization header
+	t.Token = utils.Ptr(strings.TrimPrefix(mockRequest.Header.Get("Authorization"), "Basic "))
 
 	err = uhttp.Encode(w, http.StatusOK, t)
 	if err != nil {

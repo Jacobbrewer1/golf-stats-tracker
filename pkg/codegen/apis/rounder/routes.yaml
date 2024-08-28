@@ -45,6 +45,7 @@ paths:
     post:
       summary: Login
       operationId: login
+      x-unauthenticated: true
       requestBody:
         required: true
         content:
@@ -84,10 +85,12 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
-  /round/courses:
+  /rounds/new/courses:
     get:
       summary: Get courses to start a round
-      operationId: getRoundCourses
+      operationId: getNewRoundCourses
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/query_name_param'
       responses:
@@ -112,10 +115,12 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
-  /round/marker/{course_id}:
+  /rounds/new/marker/{course_id}:
     get:
       summary: Get the marker used for a round
-      operationId: getRoundMarker
+      operationId: getNewRoundMarker
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/path_course_id'
       responses:
@@ -138,9 +143,247 @@ paths:
               schema:
                 $ref: '../common/common.yaml#/components/schemas/error_message'
 
+  /rounds:
+    post:
+      summary: Create a round
+      operationId: createRound
+      security:
+        - basicAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/round_create'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/round'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '404':
+          description: Course not found
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+    get:
+      summary: Get rounds
+      operationId: getRounds
+      security:
+        - basicAuth: [ ]
+      responses:
+        '200':
+          description: A list of rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/round'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /rounds/{round_id}/holes:
+    get:
+      summary: Get the holes for a round
+      operationId: getRoundHoles
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+      responses:
+        '200':
+          description: A list of holes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/hole'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /rounds/{round_id}/holes/{hole_id}/stats:
+    get:
+      summary: Get the stats for a hole
+      operationId: getHoleStats
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+        - $ref: '#/components/parameters/path_hole_id'
+      responses:
+        '200':
+          description: The stats for the hole
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hole_stats'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+    post:
+      summary: Update the stats for a hole
+      operationId: updateHoleStats
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/path_round_id'
+        - $ref: '#/components/parameters/path_hole_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/hole_stats'
+      responses:
+        '200':
+          description: The stats for the hole
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hole_stats'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /rounds/stats/charts/line/averages:
+    get:
+      summary: Get the stats for all rounds
+      operationId: getLineChartAverages
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/query_average_type'
+        - $ref: '../common/common.yaml#/components/parameters/from_date'
+        - $ref: '../common/common.yaml#/components/parameters/since'
+      responses:
+        '200':
+          description: The stats for all rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/chart_data_point'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
+
+  /rounds/stats/charts/pie/averages:
+    get:
+      summary: Get the stats for all rounds
+      operationId: getPieChartAverages
+      security:
+        - basicAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/query_average_type'
+      responses:
+        '200':
+          description: The stats for all rounds
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/chart_data_point'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/message'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.yaml#/components/schemas/error_message'
 
 components:
   parameters:
+    path_round_id:
+      name: round_id
+      description: The round id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The round id
     path_club_id:
       name: club_id
       description: The club id
@@ -159,6 +402,15 @@ components:
         type: integer
         format: int64
         description: The course id
+    path_hole_id:
+      name: hole_id
+      description: The hole id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The hole id
     query_name_param:
       name: name
       description: The name of the club
@@ -175,8 +427,57 @@ components:
       schema:
         type: boolean
         description: Include course details in the response
+    query_stats_par:
+      name: par
+      description: The par of the hole
+      in: query
+      required: true
+      schema:
+        type: integer
+        format: int64
+        description: The par of the hole
+    query_average_type:
+      name: average_type
+      description: The type of average
+      in: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/average_type'
 
   schemas:
+    chart_data_point:
+      type: object
+      properties:
+        x:
+          type: string
+          description: The x-axis label
+        y:
+          type: number
+          description: The y-axis label
+
+    hole_stats:
+      type: object
+      properties:
+        score:
+          type: integer
+          format: int64
+          description: The number of strokes
+        putts:
+          type: integer
+          format: int64
+          description: The number of putts
+        fairway_hit:
+          $ref: '#/components/schemas/hit_in_regulation'
+        green_hit:
+          $ref: '#/components/schemas/hit_in_regulation'
+        penalties:
+          type: integer
+          format: int64
+          description: The number of penalty strokes
+        pin_location:
+          type: string
+          description: The pin position
+
     token:
       type: object
       properties:
@@ -201,7 +502,7 @@ components:
           type: string
           description: The name of the user
 
-    round:
+    round_create:
       type: object
       properties:
         id:
@@ -212,10 +513,32 @@ components:
           type: integer
           format: int64
           description: The course id
-        user_id:
+        marker_id:
           type: integer
           format: int64
-          description: The user id
+          description: The marker id
+        tee_time:
+          type: string
+          format: date-time
+          description: The tee time
+
+    round:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: The round id
+        course_name:
+          type: string
+          description: The course name
+        marker:
+          type: string
+          description: The marker
+        tee_time:
+          type: string
+          format: date-time
+          description: The tee time
 
     club:
       type: object
@@ -345,3 +668,24 @@ components:
           format: int64
           example: 317
 
+    hit_in_regulation:
+      type: string
+      enum:
+        - HIT
+        - LEFT
+        - RIGHT
+        - SHORT
+        - LONG
+        - NOT_APPLICABLE
+
+    average_type:
+      type: string
+      description: The type of average to get
+      enum:
+        - putts
+        - fairway_hit
+        - green_hit
+        - penalties
+        - par_3
+        - par_4
+        - par_5

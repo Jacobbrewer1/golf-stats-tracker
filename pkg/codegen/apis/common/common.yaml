@@ -36,6 +36,19 @@ components:
           - ASC
           - DESC
         default: ASC
+    from_date:
+      name: from_date
+      in: query
+      description: Filter by date, from date.
+      schema:
+        type: string
+        format: date
+    since:
+      name: since
+      in: query
+      description: Filter by the duration, since the current date. (E.g. 1d, 1w, 1m, 1y)
+      schema:
+        type: string
   schemas:
     message:
       type: object

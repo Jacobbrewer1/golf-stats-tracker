@@ -11,13 +11,13 @@ import (
 
 // Round represents a row from 'round'.
 type Round struct {
-	Id       int       `db:"id,autoinc,pk"`
-	CourseId int       `db:"course_id"`
-	TeeTime  time.Time `db:"tee_time"`
+	Id      int       `db:"id,autoinc,pk"`
+	UserId  int       `db:"user_id"`
+	TeeTime time.Time `db:"tee_time"`
 }
 
 // RoundColumns is the sorted column names for the type Round
-var RoundColumns = []string{"CourseId", "Id", "TeeTime"}
+var RoundColumns = []string{"Id", "TeeTime", "UserId"}
 
 // Insert inserts the Round to the database.
 func (m *Round) Insert(db DB) error {
@@ -25,13 +25,13 @@ func (m *Round) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO round (" +
-		"`course_id`, `tee_time`" +
+		"`user_id`, `tee_time`" +
 		") VALUES (" +
 		"?, ?" +
 		")"
 
-	DBLog(sqlstr, m.CourseId, m.TeeTime)
-	res, err := db.Exec(sqlstr, m.CourseId, m.TeeTime)
+	DBLog(sqlstr, m.UserId, m.TeeTime)
+	res, err := db.Exec(sqlstr, m.UserId, m.TeeTime)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func InsertManyRounds(db DB, ms ...*Round) error {
 	defer t.ObserveDuration()
 
 	var sqlstr = "INSERT INTO round (" +
-		"`course_id`,`tee_time`" +
+		"`user_id`,`tee_time`" +
 		") VALUES"
 
 	var args []interface{}
@@ -62,7 +62,7 @@ func InsertManyRounds(db DB, ms ...*Round) error {
 		sqlstr += " (" +
 			"?,?" +
 			"),"
-		args = append(args, m.CourseId, m.TeeTime)
+		args = append(args, m.UserId, m.TeeTime)
 	}
 
 	DBLog(sqlstr, args...)
@@ -94,11 +94,11 @@ func (m *Round) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE round " +
-		"SET `course_id` = ?, `tee_time` = ? " +
+		"SET `user_id` = ?, `tee_time` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.CourseId, m.TeeTime, m.Id)
-	res, err := db.Exec(sqlstr, m.CourseId, m.TeeTime, m.Id)
+	DBLog(sqlstr, m.UserId, m.TeeTime, m.Id)
+	res, err := db.Exec(sqlstr, m.UserId, m.TeeTime, m.Id)
 	if err != nil {
 		return err
 	}
@@ -120,14 +120,14 @@ func (m *Round) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO round (" +
-		"`course_id`, `tee_time`" +
+		"`user_id`, `tee_time`" +
 		") VALUES (" +
 		"?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`course_id` = VALUES(`course_id`), `tee_time` = VALUES(`tee_time`)"
+		"`user_id` = VALUES(`user_id`), `tee_time` = VALUES(`tee_time`)"
 
-	DBLog(sqlstr, m.CourseId, m.TeeTime)
-	res, err := db.Exec(sqlstr, m.CourseId, m.TeeTime)
+	DBLog(sqlstr, m.UserId, m.TeeTime)
+	res, err := db.Exec(sqlstr, m.UserId, m.TeeTime)
 	if err != nil {
 		return err
 	}
@@ -178,7 +178,7 @@ func RoundById(db DB, id int) (*Round, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_Round"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `course_id`, `tee_time` " +
+	const sqlstr = "SELECT `id`, `user_id`, `tee_time` " +
 		"FROM round " +
 		"WHERE `id` = ?"
 
@@ -189,4 +189,11 @@ func RoundById(db DB, id int) (*Round, error) {
 	}
 
 	return &m, nil
+}
+
+// GetUser Gets an instance of User
+//
+// Generated from constraint round_user_id_fk
+func (m *Round) GetUser(db DB) (*User, error) {
+	return UserById(db, m.UserId)
 }

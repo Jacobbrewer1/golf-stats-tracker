@@ -95,11 +95,36 @@ type ClientInterface interface {
 
 	Login(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetRoundCourses request
-	GetRoundCourses(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetRounds request
+	GetRounds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetRoundMarker request
-	GetRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// CreateRoundWithBody request with any body
+	CreateRoundWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CreateRound(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetNewRoundCourses request
+	GetNewRoundCourses(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetNewRoundMarker request
+	GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetLineChartAverages request
+	GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPieChartAverages request
+	GetPieChartAverages(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRoundHoles request
+	GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetHoleStats request
+	GetHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UpdateHoleStatsWithBody request with any body
+	UpdateHoleStatsWithBody(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CreateUserWithBody request with any body
 	CreateUserWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -131,8 +156,8 @@ func (c *Client) Login(ctx context.Context, body LoginJSONRequestBody, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRoundCourses(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetRoundCoursesRequest(c.Server, params)
+func (c *Client) GetRounds(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoundsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -143,8 +168,116 @@ func (c *Client) GetRoundCourses(ctx context.Context, params *GetRoundCoursesPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetRoundMarkerRequest(c.Server, courseId)
+func (c *Client) CreateRoundWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateRoundRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CreateRound(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCreateRoundRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetNewRoundCourses(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetNewRoundCoursesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetNewRoundMarker(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetNewRoundMarkerRequest(c.Server, courseId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetLineChartAverages(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetLineChartAveragesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPieChartAverages(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPieChartAveragesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRoundHoles(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRoundHolesRequest(c.Server, roundId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetHoleStatsRequest(c.Server, roundId, holeId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateHoleStatsWithBody(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateHoleStatsRequestWithBody(c.Server, roundId, holeId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateHoleStats(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateHoleStatsRequest(c.Server, roundId, holeId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -219,8 +352,8 @@ func NewLoginRequestWithBody(server string, contentType string, body io.Reader) 
 	return req, nil
 }
 
-// NewGetRoundCoursesRequest generates requests for GetRoundCourses
-func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*http.Request, error) {
+// NewGetRoundsRequest generates requests for GetRounds
+func NewGetRoundsRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -228,7 +361,74 @@ func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*h
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/round/courses")
+	operationPath := fmt.Sprintf("/rounds")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCreateRoundRequest calls the generic CreateRound builder with application/json body
+func NewCreateRoundRequest(server string, body CreateRoundJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCreateRoundRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewCreateRoundRequestWithBody generates requests for CreateRound with any type of body
+func NewCreateRoundRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetNewRoundCoursesRequest generates requests for GetNewRoundCourses
+func NewGetNewRoundCoursesRequest(server string, params *GetNewRoundCoursesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/new/courses")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -268,8 +468,8 @@ func NewGetRoundCoursesRequest(server string, params *GetRoundCoursesParams) (*h
 	return req, nil
 }
 
-// NewGetRoundMarkerRequest generates requests for GetRoundMarker
-func NewGetRoundMarkerRequest(server string, courseId PathCourseId) (*http.Request, error) {
+// NewGetNewRoundMarkerRequest generates requests for GetNewRoundMarker
+func NewGetNewRoundMarkerRequest(server string, courseId PathCourseId) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -284,7 +484,7 @@ func NewGetRoundMarkerRequest(server string, courseId PathCourseId) (*http.Reque
 		return nil, err
 	}
 
-	operationPath := fmt.Sprintf("/round/marker/%s", pathParam0)
+	operationPath := fmt.Sprintf("/rounds/new/marker/%s", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -298,6 +498,257 @@ func NewGetRoundMarkerRequest(server string, courseId PathCourseId) (*http.Reque
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewGetLineChartAveragesRequest generates requests for GetLineChartAverages
+func NewGetLineChartAveragesRequest(server string, params *GetLineChartAveragesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/stats/charts/line/averages")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "average_type", runtime.ParamLocationQuery, params.AverageType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		if params.FromDate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "from_date", runtime.ParamLocationQuery, *params.FromDate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Since != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "since", runtime.ParamLocationQuery, *params.Since); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetPieChartAveragesRequest generates requests for GetPieChartAverages
+func NewGetPieChartAveragesRequest(server string, params *GetPieChartAveragesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/stats/charts/pie/averages")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "average_type", runtime.ParamLocationQuery, params.AverageType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetRoundHolesRequest generates requests for GetRoundHoles
+func NewGetRoundHolesRequest(server string, roundId PathRoundId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetHoleStatsRequest generates requests for GetHoleStats
+func NewGetHoleStatsRequest(server string, roundId PathRoundId, holeId PathHoleId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "hole_id", runtime.ParamLocationPath, holeId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes/%s/stats", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUpdateHoleStatsRequest calls the generic UpdateHoleStats builder with application/json body
+func NewUpdateHoleStatsRequest(server string, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateHoleStatsRequestWithBody(server, roundId, holeId, "application/json", bodyReader)
+}
+
+// NewUpdateHoleStatsRequestWithBody generates requests for UpdateHoleStats with any type of body
+func NewUpdateHoleStatsRequestWithBody(server string, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "round_id", runtime.ParamLocationPath, roundId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "hole_id", runtime.ParamLocationPath, holeId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/rounds/%s/holes/%s/stats", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -390,11 +841,36 @@ type ClientWithResponsesInterface interface {
 
 	LoginWithResponse(ctx context.Context, body LoginJSONRequestBody, reqEditors ...RequestEditorFn) (*LoginResponse, error)
 
-	// GetRoundCoursesWithResponse request
-	GetRoundCoursesWithResponse(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetRoundCoursesResponse, error)
+	// GetRoundsWithResponse request
+	GetRoundsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetRoundsResponse, error)
 
-	// GetRoundMarkerWithResponse request
-	GetRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetRoundMarkerResponse, error)
+	// CreateRoundWithBodyWithResponse request with any body
+	CreateRoundWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error)
+
+	CreateRoundWithResponse(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error)
+
+	// GetNewRoundCoursesWithResponse request
+	GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error)
+
+	// GetNewRoundMarkerWithResponse request
+	GetNewRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetNewRoundMarkerResponse, error)
+
+	// GetLineChartAveragesWithResponse request
+	GetLineChartAveragesWithResponse(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*GetLineChartAveragesResponse, error)
+
+	// GetPieChartAveragesWithResponse request
+	GetPieChartAveragesWithResponse(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*GetPieChartAveragesResponse, error)
+
+	// GetRoundHolesWithResponse request
+	GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error)
+
+	// GetHoleStatsWithResponse request
+	GetHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*GetHoleStatsResponse, error)
+
+	// UpdateHoleStatsWithBodyWithResponse request with any body
+	UpdateHoleStatsWithBodyWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error)
+
+	UpdateHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error)
 
 	// CreateUserWithBodyWithResponse request with any body
 	CreateUserWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateUserResponse, error)
@@ -427,7 +903,56 @@ func (r LoginResponse) StatusCode() int {
 	return 0
 }
 
-type GetRoundCoursesResponse struct {
+type GetRoundsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Round
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoundsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoundsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type CreateRoundResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *Round
+	JSON400      *externalRef0.ErrorMessage
+	JSON404      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r CreateRoundResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CreateRoundResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetNewRoundCoursesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]Course
@@ -436,7 +961,7 @@ type GetRoundCoursesResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRoundCoursesResponse) Status() string {
+func (r GetNewRoundCoursesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -444,14 +969,14 @@ func (r GetRoundCoursesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRoundCoursesResponse) StatusCode() int {
+func (r GetNewRoundCoursesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-type GetRoundMarkerResponse struct {
+type GetNewRoundMarkerResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CourseDetails
@@ -460,7 +985,7 @@ type GetRoundMarkerResponse struct {
 }
 
 // Status returns HTTPResponse.Status
-func (r GetRoundMarkerResponse) Status() string {
+func (r GetNewRoundMarkerResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -468,7 +993,129 @@ func (r GetRoundMarkerResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetRoundMarkerResponse) StatusCode() int {
+func (r GetNewRoundMarkerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetLineChartAveragesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]ChartDataPoint
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetLineChartAveragesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetLineChartAveragesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetPieChartAveragesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]ChartDataPoint
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPieChartAveragesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPieChartAveragesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetRoundHolesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]Hole
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRoundHolesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRoundHolesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type GetHoleStatsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HoleStats
+	JSON400      *externalRef0.ErrorMessage
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetHoleStatsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetHoleStatsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UpdateHoleStatsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *HoleStats
+	JSON400      *externalRef0.ErrorMessage
+	JSON401      *externalRef0.Message
+	JSON500      *externalRef0.ErrorMessage
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateHoleStatsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateHoleStatsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -517,22 +1164,101 @@ func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, body LoginJ
 	return ParseLoginResponse(rsp)
 }
 
-// GetRoundCoursesWithResponse request returning *GetRoundCoursesResponse
-func (c *ClientWithResponses) GetRoundCoursesWithResponse(ctx context.Context, params *GetRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetRoundCoursesResponse, error) {
-	rsp, err := c.GetRoundCourses(ctx, params, reqEditors...)
+// GetRoundsWithResponse request returning *GetRoundsResponse
+func (c *ClientWithResponses) GetRoundsWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*GetRoundsResponse, error) {
+	rsp, err := c.GetRounds(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRoundCoursesResponse(rsp)
+	return ParseGetRoundsResponse(rsp)
 }
 
-// GetRoundMarkerWithResponse request returning *GetRoundMarkerResponse
-func (c *ClientWithResponses) GetRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetRoundMarkerResponse, error) {
-	rsp, err := c.GetRoundMarker(ctx, courseId, reqEditors...)
+// CreateRoundWithBodyWithResponse request with arbitrary body returning *CreateRoundResponse
+func (c *ClientWithResponses) CreateRoundWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error) {
+	rsp, err := c.CreateRoundWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetRoundMarkerResponse(rsp)
+	return ParseCreateRoundResponse(rsp)
+}
+
+func (c *ClientWithResponses) CreateRoundWithResponse(ctx context.Context, body CreateRoundJSONRequestBody, reqEditors ...RequestEditorFn) (*CreateRoundResponse, error) {
+	rsp, err := c.CreateRound(ctx, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCreateRoundResponse(rsp)
+}
+
+// GetNewRoundCoursesWithResponse request returning *GetNewRoundCoursesResponse
+func (c *ClientWithResponses) GetNewRoundCoursesWithResponse(ctx context.Context, params *GetNewRoundCoursesParams, reqEditors ...RequestEditorFn) (*GetNewRoundCoursesResponse, error) {
+	rsp, err := c.GetNewRoundCourses(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetNewRoundCoursesResponse(rsp)
+}
+
+// GetNewRoundMarkerWithResponse request returning *GetNewRoundMarkerResponse
+func (c *ClientWithResponses) GetNewRoundMarkerWithResponse(ctx context.Context, courseId PathCourseId, reqEditors ...RequestEditorFn) (*GetNewRoundMarkerResponse, error) {
+	rsp, err := c.GetNewRoundMarker(ctx, courseId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetNewRoundMarkerResponse(rsp)
+}
+
+// GetLineChartAveragesWithResponse request returning *GetLineChartAveragesResponse
+func (c *ClientWithResponses) GetLineChartAveragesWithResponse(ctx context.Context, params *GetLineChartAveragesParams, reqEditors ...RequestEditorFn) (*GetLineChartAveragesResponse, error) {
+	rsp, err := c.GetLineChartAverages(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetLineChartAveragesResponse(rsp)
+}
+
+// GetPieChartAveragesWithResponse request returning *GetPieChartAveragesResponse
+func (c *ClientWithResponses) GetPieChartAveragesWithResponse(ctx context.Context, params *GetPieChartAveragesParams, reqEditors ...RequestEditorFn) (*GetPieChartAveragesResponse, error) {
+	rsp, err := c.GetPieChartAverages(ctx, params, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPieChartAveragesResponse(rsp)
+}
+
+// GetRoundHolesWithResponse request returning *GetRoundHolesResponse
+func (c *ClientWithResponses) GetRoundHolesWithResponse(ctx context.Context, roundId PathRoundId, reqEditors ...RequestEditorFn) (*GetRoundHolesResponse, error) {
+	rsp, err := c.GetRoundHoles(ctx, roundId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRoundHolesResponse(rsp)
+}
+
+// GetHoleStatsWithResponse request returning *GetHoleStatsResponse
+func (c *ClientWithResponses) GetHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, reqEditors ...RequestEditorFn) (*GetHoleStatsResponse, error) {
+	rsp, err := c.GetHoleStats(ctx, roundId, holeId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetHoleStatsResponse(rsp)
+}
+
+// UpdateHoleStatsWithBodyWithResponse request with arbitrary body returning *UpdateHoleStatsResponse
+func (c *ClientWithResponses) UpdateHoleStatsWithBodyWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error) {
+	rsp, err := c.UpdateHoleStatsWithBody(ctx, roundId, holeId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateHoleStatsResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateHoleStatsWithResponse(ctx context.Context, roundId PathRoundId, holeId PathHoleId, body UpdateHoleStatsJSONRequestBody, reqEditors ...RequestEditorFn) (*UpdateHoleStatsResponse, error) {
+	rsp, err := c.UpdateHoleStats(ctx, roundId, holeId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateHoleStatsResponse(rsp)
 }
 
 // CreateUserWithBodyWithResponse request with arbitrary body returning *CreateUserResponse
@@ -599,15 +1325,102 @@ func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
 	return response, nil
 }
 
-// ParseGetRoundCoursesResponse parses an HTTP response from a GetRoundCoursesWithResponse call
-func ParseGetRoundCoursesResponse(rsp *http.Response) (*GetRoundCoursesResponse, error) {
+// ParseGetRoundsResponse parses an HTTP response from a GetRoundsWithResponse call
+func ParseGetRoundsResponse(rsp *http.Response) (*GetRoundsResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRoundCoursesResponse{
+	response := &GetRoundsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Round
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCreateRoundResponse parses an HTTP response from a CreateRoundWithResponse call
+func ParseCreateRoundResponse(rsp *http.Response) (*CreateRoundResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CreateRoundResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest Round
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetNewRoundCoursesResponse parses an HTTP response from a GetNewRoundCoursesWithResponse call
+func ParseGetNewRoundCoursesResponse(rsp *http.Response) (*GetNewRoundCoursesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetNewRoundCoursesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -639,15 +1452,15 @@ func ParseGetRoundCoursesResponse(rsp *http.Response) (*GetRoundCoursesResponse,
 	return response, nil
 }
 
-// ParseGetRoundMarkerResponse parses an HTTP response from a GetRoundMarkerWithResponse call
-func ParseGetRoundMarkerResponse(rsp *http.Response) (*GetRoundMarkerResponse, error) {
+// ParseGetNewRoundMarkerResponse parses an HTTP response from a GetNewRoundMarkerWithResponse call
+func ParseGetNewRoundMarkerResponse(rsp *http.Response) (*GetNewRoundMarkerResponse, error) {
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetRoundMarkerResponse{
+	response := &GetNewRoundMarkerResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -666,6 +1479,220 @@ func ParseGetRoundMarkerResponse(rsp *http.Response) (*GetRoundMarkerResponse, e
 			return nil, err
 		}
 		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetLineChartAveragesResponse parses an HTTP response from a GetLineChartAveragesWithResponse call
+func ParseGetLineChartAveragesResponse(rsp *http.Response) (*GetLineChartAveragesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetLineChartAveragesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []ChartDataPoint
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetPieChartAveragesResponse parses an HTTP response from a GetPieChartAveragesWithResponse call
+func ParseGetPieChartAveragesResponse(rsp *http.Response) (*GetPieChartAveragesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPieChartAveragesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []ChartDataPoint
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRoundHolesResponse parses an HTTP response from a GetRoundHolesWithResponse call
+func ParseGetRoundHolesResponse(rsp *http.Response) (*GetRoundHolesResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRoundHolesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []Hole
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetHoleStatsResponse parses an HTTP response from a GetHoleStatsWithResponse call
+func ParseGetHoleStatsResponse(rsp *http.Response) (*GetHoleStatsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetHoleStatsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HoleStats
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON500 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateHoleStatsResponse parses an HTTP response from a UpdateHoleStatsWithResponse call
+func ParseUpdateHoleStatsResponse(rsp *http.Response) (*UpdateHoleStatsResponse, error) {
+	bodyBytes, err := io.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateHoleStatsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest HoleStats
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 400:
+		var dest externalRef0.ErrorMessage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON400 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 401:
+		var dest externalRef0.Message
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON401 = &dest
 
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 500:
 		var dest externalRef0.ErrorMessage

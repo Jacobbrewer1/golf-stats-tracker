@@ -9,13 +9,13 @@ import (
 
 // Course represents a row from 'course'.
 type Course struct {
-	Id     int    `db:"id,autoinc,pk"`
-	ClubId int    `db:"club_id"`
-	Name   string `db:"name"`
+	Id      int    `db:"id,autoinc,pk"`
+	RoundId int    `db:"round_id"`
+	Name    string `db:"name"`
 }
 
 // CourseColumns is the sorted column names for the type Course
-var CourseColumns = []string{"ClubId", "Id", "Name"}
+var CourseColumns = []string{"Id", "Name", "RoundId"}
 
 // Insert inserts the Course to the database.
 func (m *Course) Insert(db DB) error {
@@ -23,13 +23,13 @@ func (m *Course) Insert(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO course (" +
-		"`club_id`, `name`" +
+		"`round_id`, `name`" +
 		") VALUES (" +
 		"?, ?" +
 		")"
 
-	DBLog(sqlstr, m.ClubId, m.Name)
-	res, err := db.Exec(sqlstr, m.ClubId, m.Name)
+	DBLog(sqlstr, m.RoundId, m.Name)
+	res, err := db.Exec(sqlstr, m.RoundId, m.Name)
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func InsertManyCourses(db DB, ms ...*Course) error {
 	defer t.ObserveDuration()
 
 	var sqlstr = "INSERT INTO course (" +
-		"`club_id`,`name`" +
+		"`round_id`,`name`" +
 		") VALUES"
 
 	var args []interface{}
@@ -60,7 +60,7 @@ func InsertManyCourses(db DB, ms ...*Course) error {
 		sqlstr += " (" +
 			"?,?" +
 			"),"
-		args = append(args, m.ClubId, m.Name)
+		args = append(args, m.RoundId, m.Name)
 	}
 
 	DBLog(sqlstr, args...)
@@ -92,11 +92,11 @@ func (m *Course) Update(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "UPDATE course " +
-		"SET `club_id` = ?, `name` = ? " +
+		"SET `round_id` = ?, `name` = ? " +
 		"WHERE `id` = ?"
 
-	DBLog(sqlstr, m.ClubId, m.Name, m.Id)
-	res, err := db.Exec(sqlstr, m.ClubId, m.Name, m.Id)
+	DBLog(sqlstr, m.RoundId, m.Name, m.Id)
+	res, err := db.Exec(sqlstr, m.RoundId, m.Name, m.Id)
 	if err != nil {
 		return err
 	}
@@ -118,14 +118,14 @@ func (m *Course) InsertWithUpdate(db DB) error {
 	defer t.ObserveDuration()
 
 	const sqlstr = "INSERT INTO course (" +
-		"`club_id`, `name`" +
+		"`round_id`, `name`" +
 		") VALUES (" +
 		"?, ?" +
 		") ON DUPLICATE KEY UPDATE " +
-		"`club_id` = VALUES(`club_id`), `name` = VALUES(`name`)"
+		"`round_id` = VALUES(`round_id`), `name` = VALUES(`name`)"
 
-	DBLog(sqlstr, m.ClubId, m.Name)
-	res, err := db.Exec(sqlstr, m.ClubId, m.Name)
+	DBLog(sqlstr, m.RoundId, m.Name)
+	res, err := db.Exec(sqlstr, m.RoundId, m.Name)
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func CourseById(db DB, id int) (*Course, error) {
 	t := prometheus.NewTimer(DatabaseLatency.WithLabelValues("insert_Course"))
 	defer t.ObserveDuration()
 
-	const sqlstr = "SELECT `id`, `club_id`, `name` " +
+	const sqlstr = "SELECT `id`, `round_id`, `name` " +
 		"FROM course " +
 		"WHERE `id` = ?"
 
@@ -187,11 +187,4 @@ func CourseById(db DB, id int) (*Course, error) {
 	}
 
 	return &m, nil
-}
-
-// GetClub Gets an instance of Club
-//
-// Generated from constraint course_club_id_fk
-func (m *Course) GetClub(db DB) (*Club, error) {
-	return ClubById(db, m.ClubId)
 }
