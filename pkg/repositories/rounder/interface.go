@@ -48,17 +48,29 @@ type Repository interface {
 	// CountHolesByRoundAndPar counts the number of holes for a round and par.
 	CountHolesByRoundAndPar(roundId int, par int64) (int, error)
 
-	// GetStatsByUserId gets the stats for a user.
-	GetStatsByUserId(userId int) ([]*HoleWithStats, error)
+	// GetStatsByRoundId gets the stats for a user.
+	GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error)
 
 	// CountHolesByRoundId counts the number of holes for a round.
 	CountHolesByRoundId(roundId int) (int, error)
+
+	// SaveRoundStats saves the stats for a round.
+	SaveRoundStats(roundStats *models.RoundStats) error
+
+	// GetStatsByUserId gets all stats for a user.
+	GetStatsByUserId(userId int) ([]*RoundWithStats, error)
 }
 
 type HoleWithStats struct {
 	Round *models.Round
 	Hole  *models.Hole
 	Stats *models.HoleStats
+}
+
+type RoundWithStats struct {
+	Round  *models.Round
+	Course *models.Course
+	Stats  *models.RoundStats
 }
 
 type RoundDetails struct {

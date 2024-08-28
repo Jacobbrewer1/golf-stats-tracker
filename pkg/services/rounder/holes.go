@@ -3,6 +3,7 @@ package rounder
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 
@@ -110,7 +111,7 @@ func (s *service) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId a
 	stats, err := s.r.GetHoleStatsByHoleId(hole.Id)
 	if err != nil {
 		switch {
-		case errors.Is(err, repo.ErrNoHoleStatsFound):
+		case errors.Is(err, repo.ErrNoStatsFound):
 			stats = new(models.HoleStats)
 			stats.HoleId = hole.Id
 		default:
@@ -191,7 +192,7 @@ func (s *service) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundI
 	stats, err := s.r.GetHoleStatsByHoleId(hole.Id)
 	if err != nil {
 		switch {
-		case errors.Is(err, repo.ErrNoHoleStatsFound):
+		case errors.Is(err, repo.ErrNoStatsFound):
 			stats = new(models.HoleStats)
 			stats.HoleId = hole.Id
 		default:
@@ -229,11 +230,91 @@ func (s *service) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundI
 		}
 	}
 
+	go func() {
+		csErr := s.calculateStats(round.UserId, round.Id)
+		if csErr != nil {
+			slog.Error("Error calculating stats", slog.String(logging.KeyError, csErr.Error()))
+		}
+	}()
+
 	err = uhttp.Encode(w, http.StatusOK, modelHoleStatsAsApiHoleStats(newStats))
 	if err != nil {
 		slog.Error("Error encoding hole stats", slog.String(logging.KeyError, err.Error()))
 		return
 	}
+}
+
+func (s *service) calculateStats(userId int, roundId int) error {
+	// Get the line chart data.
+	roundData, err := s.r.GetStatsByRoundId(userId, roundId)
+	if err != nil {
+		return fmt.Errorf("error getting line chart data: %w", err)
+	}
+
+	// Calculate the average score per round.
+	totalFairwayCount := 0
+	totalFairwayHit := 0
+	totalGreenHit := 0
+	totalPutts := 0
+	penalties := 0
+	totalScorePar3 := 0
+	totalPar3 := 0
+	totalScorePar4 := 0
+	totalPar4 := 0
+	totalScorePar5 := 0
+	totalPar5 := 0
+
+	for _, data := range roundData {
+		penalties += data.Stats.Penalties
+		totalPutts += data.Stats.Putts
+		if string(data.Stats.FairwayHit) != models.HoleStatsFairwayHitNOTAPPLICABLE {
+			totalFairwayCount += 1
+		}
+		if string(data.Stats.FairwayHit) == models.HoleStatsFairwayHitHIT {
+			totalFairwayHit += 1
+		}
+		if string(data.Stats.GreenHit) == models.HoleStatsGreenHitHIT {
+			totalGreenHit += 1
+		}
+
+		switch data.Hole.Par {
+		case 3:
+			totalScorePar3 += data.Stats.Score
+			totalPar3 += 1
+		case 4:
+			totalScorePar4 += data.Stats.Score
+			totalPar4 += 1
+		case 5:
+			totalScorePar5 += data.Stats.Score
+			totalPar5 += 1
+		}
+	}
+
+	// Calculate the averages
+	averagePutts := float64(totalPutts) / float64(len(roundData))
+	averageFairwayHit := (float64(totalFairwayHit) / float64(totalFairwayCount)) * 100
+	averageGreenHit := (float64(totalGreenHit) / float64(len(roundData))) * 100
+	avgPar3 := float64(totalScorePar3) / float64(totalPar3)
+	avgPar4 := float64(totalScorePar4) / float64(totalPar4)
+	avgPar5 := float64(totalScorePar5) / float64(totalPar5)
+
+	m := &models.RoundStats{
+		RoundId:        roundId,
+		AvgFairwaysHit: averageFairwayHit,
+		AvgGreensHit:   averageGreenHit,
+		AvgPutts:       averagePutts,
+		Penalties:      penalties,
+		AvgPar3:        avgPar3,
+		AvgPar4:        avgPar4,
+		AvgPar5:        avgPar5,
+	}
+
+	err = s.r.SaveRoundStats(m)
+	if err != nil {
+		return fmt.Errorf("error saving round stats: %w", err)
+	}
+
+	return nil
 }
 
 func apiAsModelHoleStats(stats *api.HoleStats) (*models.HoleStats, error) {

@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+const (
+	BasicAuthScopes = "basicAuth.Scopes"
+)
+
 // AverageType defines the model for average_type.
 type AverageType = string
 
@@ -14,6 +18,9 @@ type AverageType = string
 const (
 	AverageType_fairway_hit AverageType = "fairway_hit"
 	AverageType_green_hit   AverageType = "green_hit"
+	AverageType_par_3       AverageType = "par_3"
+	AverageType_par_4       AverageType = "par_4"
+	AverageType_par_5       AverageType = "par_5"
 	AverageType_penalties   AverageType = "penalties"
 	AverageType_putts       AverageType = "putts"
 )

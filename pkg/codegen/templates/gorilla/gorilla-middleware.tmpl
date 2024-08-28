@@ -211,15 +211,17 @@ func (siw *ServerInterfaceWrapper) {{$opid}}(w http.ResponseWriter, r *http.Requ
     {{end}}
   {{end}}
 
-  {{ if ne (index .Spec.Extensions "x-unauthenticated") true }}
-  if siw.authz != nil {
-    siw.authz.{{$opid}}(cw, r.WithContext(ctx){{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
-    return
-  }
-  {{ end }}
+
 
   handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    {{- if .Spec.Security }}
+    if siw.authz != nil {
+      siw.authz.{{$opid}}(cw, r.WithContext(ctx){{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
+      return
+    }
+    {{ else }}
     siw.handler.{{.OperationId}}(cw, r{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
+    {{ end -}}
   }))
 
   handler.ServeHTTP(cw, r.WithContext(ctx))

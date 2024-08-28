@@ -28,8 +28,8 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
     router.Use(uhttp.RequestIDToContextMux())
 
 {{ range . }}
-    {{- $unauth := (index .Spec.Extensions "x-unauthenticated") }}
-    {{- if not $unauth }}
+    {{- $authed := .Spec.Security }}
+    {{- if $authed }}
         router.Methods(http.Method{{.Method | lower | title }}).Path("{{.Path}}").Handler(wrapHandler(wrapper.{{.OperationId}}))
     {{ end -}}
 {{ end -}}
@@ -38,7 +38,7 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
 
 {{ $unauthedExists := false}}
 {{ range . }}
-    {{ $unauth := (index .Spec.Extensions "x-unauthenticated") }}
+    {{ $unauth := not .Spec.Security }}
     {{ if $unauth }}
         {{ $unauthedExists = true }}
     {{ end -}}
@@ -63,10 +63,8 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
 
     // We do not have a gateway preparer here as no auth is sent.
     {{ range . }}
-        {{- $unauth := (index .Spec.Extensions "x-unauthenticated") }}
+        {{- $unauth := not .Spec.Security }}
         {{- if $unauth }}
-            {{- $metricPrefix := (index .Spec.Extensions "x-prometheus-metric-prefix") -}}
-            {{- $applyRateLimit := (index .Spec.Extensions "x-global-rate-limit") -}}
             router.Methods(http.Method{{.Method | lower | title }}).Path("{{.Path | swaggerUriToGorillaUri}}").Handler(wrapHandler(wrapper.{{.OperationId}}))
         {{ end -}}
     {{ end -}}

@@ -9,8 +9,8 @@ import (
 )
 
 var (
-	ErrNoHolesFound     = errors.New("no holes found")
-	ErrNoHoleStatsFound = errors.New("no hole stats found")
+	ErrNoHolesFound = errors.New("no holes found")
+	ErrNoStatsFound = errors.New("no stats found")
 )
 
 func (r *repository) CreateHole(hole *models.Hole) error {
@@ -58,7 +58,7 @@ func (r *repository) GetHoleStatsByHoleId(holeId int) (*models.HoleStats, error)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrNoHoleStatsFound
+			return nil, ErrNoStatsFound
 		default:
 			return nil, fmt.Errorf("failed to get hole stats by hole ID: %w", err)
 		}
@@ -156,10 +156,9 @@ func (r *repository) CountHolesByRoundAndPar(roundId int, par int64) (int, error
 	return count, nil
 }
 
-func (r *repository) GetStatsByUserId(userId int) ([]*HoleWithStats, error) {
+func (r *repository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error) {
 	sqlStmt := `
 	SELECT
-	    r.id AS round_id,
 		s.id AS stats_id
 	FROM hole h
 		INNER JOIN hole_stats s ON h.id = s.hole_id
@@ -167,27 +166,28 @@ func (r *repository) GetStatsByUserId(userId int) ([]*HoleWithStats, error) {
 		INNER JOIN course c ON cd.course_id = c.id
 		INNER JOIN round r ON c.round_id = r.id
 	WHERE r.user_id = ?
+		AND r.id = ?
 	`
 
-	type idStruct struct {
-		RoundId int `db:"round_id"`
-		StatsId int `db:"stats_id"`
+	ids := make([]int, 0)
+	err := r.db.Select(&ids, sqlStmt, userId, roundId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNoStatsFound
+		default:
+			return nil, fmt.Errorf("failed to get hole stats: %w", err)
+		}
 	}
 
-	ids := make([]idStruct, 0)
-	err := r.db.Select(&ids, sqlStmt, userId)
+	round, err := models.RoundById(r.db, roundId)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get hole stats: %w", err)
+		return nil, fmt.Errorf("failed to get round by ID: %w", err)
 	}
 
 	holeStats := make([]*HoleWithStats, 0, len(ids))
 	for _, id := range ids {
-		round, err := models.RoundById(r.db, id.RoundId)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get round by ID: %w", err)
-		}
-
-		holeStat, err := models.HoleStatsById(r.db, id.StatsId)
+		holeStat, err := models.HoleStatsById(r.db, id)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get hole stats by ID: %w", err)
 		}
@@ -223,4 +223,60 @@ func (r *repository) CountHolesByRoundId(roundId int) (int, error) {
 	}
 
 	return count, nil
+}
+
+func (r *repository) GetStatsByUserId(userId int) ([]*RoundWithStats, error) {
+	sqlStmt := `
+	SELECT
+		rs.id AS stats_id,
+		r.id AS round_id,
+		c.id AS course_id
+	FROM round_stats rs
+		INNER JOIN round r ON rs.round_id = r.id
+		INNER JOIN course c ON c.round_id = r.id
+	WHERE r.user_id = ?
+	`
+
+	type idStruct struct {
+		StatsId  int `db:"stats_id"`
+		RoundId  int `db:"round_id"`
+		CourseId int `db:"course_id"`
+	}
+
+	ids := make([]idStruct, 0)
+	err := r.db.Select(&ids, sqlStmt, userId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrNoStatsFound
+		default:
+			return nil, fmt.Errorf("failed to get round stats: %w", err)
+		}
+	}
+
+	holeStats := make([]*RoundWithStats, 0, len(ids))
+	for _, id := range ids {
+		round, err := models.RoundById(r.db, id.RoundId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get round by ID: %w", err)
+		}
+
+		course, err := models.CourseById(r.db, id.CourseId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get course by ID: %w", err)
+		}
+
+		roundStats, err := models.RoundStatsById(r.db, id.StatsId)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get round stats by ID: %w", err)
+		}
+
+		holeStats = append(holeStats, &RoundWithStats{
+			Round:  round,
+			Course: course,
+			Stats:  roundStats,
+		})
+	}
+
+	return holeStats, nil
 }

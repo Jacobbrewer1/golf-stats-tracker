@@ -122,13 +122,11 @@ func (siw *ServerInterfaceWrapper) GetRounds(w http.ResponseWriter, r *http.Requ
 		}
 	}()
 
-	if siw.authz != nil {
-		siw.authz.GetRounds(cw, r.WithContext(ctx))
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetRounds(cw, r)
+		if siw.authz != nil {
+			siw.authz.GetRounds(cw, r.WithContext(ctx))
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -145,13 +143,11 @@ func (siw *ServerInterfaceWrapper) CreateRound(w http.ResponseWriter, r *http.Re
 		}
 	}()
 
-	if siw.authz != nil {
-		siw.authz.CreateRound(cw, r.WithContext(ctx))
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.CreateRound(cw, r)
+		if siw.authz != nil {
+			siw.authz.CreateRound(cw, r.WithContext(ctx))
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -181,13 +177,11 @@ func (siw *ServerInterfaceWrapper) GetNewRoundCourses(w http.ResponseWriter, r *
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetNewRoundCourses(cw, r.WithContext(ctx), params)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetNewRoundCourses(cw, r, params)
+		if siw.authz != nil {
+			siw.authz.GetNewRoundCourses(cw, r.WithContext(ctx), params)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -215,13 +209,11 @@ func (siw *ServerInterfaceWrapper) GetNewRoundMarker(w http.ResponseWriter, r *h
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetNewRoundMarker(cw, r.WithContext(ctx), courseId)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetNewRoundMarker(cw, r, courseId)
+		if siw.authz != nil {
+			siw.authz.GetNewRoundMarker(cw, r.WithContext(ctx), courseId)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -258,13 +250,11 @@ func (siw *ServerInterfaceWrapper) GetLineChartAverages(w http.ResponseWriter, r
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetLineChartAverages(cw, r.WithContext(ctx), params)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetLineChartAverages(cw, r, params)
+		if siw.authz != nil {
+			siw.authz.GetLineChartAverages(cw, r.WithContext(ctx), params)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -301,13 +291,11 @@ func (siw *ServerInterfaceWrapper) GetLineChartScoreAverage(w http.ResponseWrite
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetLineChartScoreAverage(cw, r.WithContext(ctx), params)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetLineChartScoreAverage(cw, r, params)
+		if siw.authz != nil {
+			siw.authz.GetLineChartScoreAverage(cw, r.WithContext(ctx), params)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -335,13 +323,11 @@ func (siw *ServerInterfaceWrapper) GetRoundHoles(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetRoundHoles(cw, r.WithContext(ctx), roundId)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetRoundHoles(cw, r, roundId)
+		if siw.authz != nil {
+			siw.authz.GetRoundHoles(cw, r.WithContext(ctx), roundId)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -378,13 +364,11 @@ func (siw *ServerInterfaceWrapper) GetHoleStats(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.GetHoleStats(cw, r.WithContext(ctx), roundId, holeId)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.GetHoleStats(cw, r, roundId, holeId)
+		if siw.authz != nil {
+			siw.authz.GetHoleStats(cw, r.WithContext(ctx), roundId, holeId)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -421,13 +405,11 @@ func (siw *ServerInterfaceWrapper) UpdateHoleStats(w http.ResponseWriter, r *htt
 		return
 	}
 
-	if siw.authz != nil {
-		siw.authz.UpdateHoleStats(cw, r.WithContext(ctx), roundId, holeId)
-		return
-	}
-
 	handler := http.Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		siw.handler.UpdateHoleStats(cw, r, roundId, holeId)
+		if siw.authz != nil {
+			siw.authz.UpdateHoleStats(cw, r.WithContext(ctx), roundId, holeId)
+			return
+		}
 	}))
 
 	handler.ServeHTTP(cw, r.WithContext(ctx))
@@ -585,6 +567,8 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
 	router.Use(uhttp.RequestIDToContextMux())
 
 	// We do not have a gateway preparer here as no auth is sent.
+
 	router.Methods(http.MethodPost).Path("/login").Handler(wrapHandler(wrapper.Login))
+
 	router.Methods(http.MethodPost).Path("/users").Handler(wrapHandler(wrapper.CreateUser))
 }

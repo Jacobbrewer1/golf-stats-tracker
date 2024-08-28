@@ -9,7 +9,6 @@ paths:
     post:
       summary: Create a user
       operationId: createUser
-      x-unauthenticated: true
       requestBody:
         required: true
         content:
@@ -90,6 +89,8 @@ paths:
     get:
       summary: Get courses to start a round
       operationId: getNewRoundCourses
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/query_name_param'
       responses:
@@ -118,6 +119,8 @@ paths:
     get:
       summary: Get the marker used for a round
       operationId: getNewRoundMarker
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/path_course_id'
       responses:
@@ -144,6 +147,8 @@ paths:
     post:
       summary: Create a round
       operationId: createRound
+      security:
+        - basicAuth: [ ]
       requestBody:
         required: true
         content:
@@ -178,6 +183,8 @@ paths:
     get:
       summary: Get rounds
       operationId: getRounds
+      security:
+        - basicAuth: [ ]
       responses:
         '200':
           description: A list of rounds
@@ -204,6 +211,8 @@ paths:
     get:
       summary: Get the holes for a round
       operationId: getRoundHoles
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/path_round_id'
       responses:
@@ -232,6 +241,8 @@ paths:
     get:
       summary: Get the stats for a hole
       operationId: getHoleStats
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/path_round_id'
         - $ref: '#/components/parameters/path_hole_id'
@@ -263,6 +274,8 @@ paths:
     post:
       summary: Update the stats for a hole
       operationId: updateHoleStats
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/path_round_id'
         - $ref: '#/components/parameters/path_hole_id'
@@ -302,6 +315,8 @@ paths:
     get:
       summary: Get the stats for all rounds
       operationId: getLineChartScoreAverage
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/query_stats_par'
       responses:
@@ -330,6 +345,8 @@ paths:
     get:
       summary: Get the stats for all rounds
       operationId: getLineChartAverages
+      security:
+        - basicAuth: [ ]
       parameters:
         - $ref: '#/components/parameters/query_average_type'
       responses:
@@ -661,9 +678,12 @@ components:
 
     average_type:
       type: string
+      description: The type of average to get
       enum:
         - putts
         - fairway_hit
         - green_hit
         - penalties
-      description: The type of average to get
+        - par_3
+        - par_4
+        - par_5

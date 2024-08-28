@@ -1,6 +1,8 @@
 package rounder
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
@@ -91,4 +93,27 @@ func (r *repository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
 	}
 
 	return rounds, nil
+}
+
+func (r *repository) SaveRoundStats(roundStats *models.RoundStats) error {
+	// Check if there is already some round stats to update.
+	sqlStmt := `SELECT id FROM round_stats WHERE round_id = ?`
+
+	var id int
+	err := r.db.Get(&id, sqlStmt, roundStats.RoundId)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			id = 0
+		default:
+			return fmt.Errorf("failed to get round stats ID: %w", err)
+		}
+	}
+
+	if id == 0 {
+		return roundStats.Insert(r.db)
+	}
+
+	roundStats.Id = id
+	return roundStats.Update(r.db)
 }
