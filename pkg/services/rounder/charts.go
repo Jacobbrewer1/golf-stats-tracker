@@ -46,6 +46,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 
 	// If the "from_date" parameter is set, filter the data.
 	if params.FromDate != nil {
+		slog.Debug("Filtering line chart data by from_date", slog.String("from_date", params.FromDate.String()))
 		lineChartData = filterRoundStatsByDate(lineChartData, params.FromDate.Time)
 	}
 
