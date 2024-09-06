@@ -74,7 +74,7 @@ func (r *repository) GetRoundDetailsByRoundId(roundId int) (*RoundDetails, error
 	}, nil
 }
 
-func (r *repository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
+func (r *repository) GetRoundsByUserId(userId int) (*PaginationResponse[models.Round], error) {
 	sqlStmt := `SELECT id FROM round WHERE user_id = ?`
 
 	var roundIDs []int
@@ -92,7 +92,10 @@ func (r *repository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
 		rounds = append(rounds, round)
 	}
 
-	return rounds, nil
+	return &PaginationResponse[models.Round]{
+		Items: rounds,
+		Total: int64(len(rounds)),
+	}, nil
 }
 
 func (r *repository) SaveRoundStats(roundStats *models.RoundStats) error {

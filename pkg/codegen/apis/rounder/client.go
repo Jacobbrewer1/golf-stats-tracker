@@ -906,7 +906,7 @@ func (r LoginResponse) StatusCode() int {
 type GetRoundsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]Round
+	JSON200      *RoundsResponse
 	JSON401      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -955,7 +955,7 @@ func (r CreateRoundResponse) StatusCode() int {
 type GetNewRoundCoursesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]Course
+	JSON200      *CoursesResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -979,7 +979,7 @@ func (r GetNewRoundCoursesResponse) StatusCode() int {
 type GetNewRoundMarkerResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *CourseDetails
+	JSON200      *CourseDetailsResponse
 	JSON400      *externalRef0.ErrorMessage
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -1027,7 +1027,7 @@ func (r GetLineChartAveragesResponse) StatusCode() int {
 type GetPieChartAveragesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]ChartDataPoint
+	JSON200      *ChartDataResponse
 	JSON401      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -1051,7 +1051,7 @@ func (r GetPieChartAveragesResponse) StatusCode() int {
 type GetRoundHolesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]Hole
+	JSON200      *HolesResponse
 	JSON401      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -1340,7 +1340,7 @@ func ParseGetRoundsResponse(rsp *http.Response) (*GetRoundsResponse, error) {
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Round
+		var dest RoundsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1427,7 +1427,7 @@ func ParseGetNewRoundCoursesResponse(rsp *http.Response) (*GetNewRoundCoursesRes
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Course
+		var dest CoursesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1467,7 +1467,7 @@ func ParseGetNewRoundMarkerResponse(rsp *http.Response) (*GetNewRoundMarkerRespo
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CourseDetails
+		var dest CourseDetailsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1547,7 +1547,7 @@ func ParseGetPieChartAveragesResponse(rsp *http.Response) (*GetPieChartAveragesR
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []ChartDataPoint
+		var dest ChartDataResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -1587,7 +1587,7 @@ func ParseGetRoundHolesResponse(rsp *http.Response) (*GetRoundHolesResponse, err
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []Hole
+		var dest HolesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

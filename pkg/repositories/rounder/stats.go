@@ -17,7 +17,7 @@ func (r *repository) SaveRoundHitStats(roundHitStats ...*models.RoundHitStats) e
 	return nil
 }
 
-func (r *repository) GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models.RoundHitStats, error) {
+func (r *repository) GetRoundHitStatsByRoundStatsId(roundStatsId int) (*PaginationResponse[models.RoundHitStats], error) {
 	sqlStmt := `SELECT id FROM round_hit_stats WHERE round_stats_id = ?`
 
 	ids := make([]int, 0)
@@ -35,7 +35,10 @@ func (r *repository) GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models
 		roundHitStats = append(roundHitStats, rhs)
 	}
 
-	return roundHitStats, nil
+	return &PaginationResponse[models.RoundHitStats]{
+		Items: roundHitStats,
+		Total: int64(len(roundHitStats)),
+	}, nil
 }
 
 func (r *repository) GetRoundStatsByRoundId(roundId int) (*models.RoundStats, error) {
@@ -50,7 +53,7 @@ func (r *repository) GetRoundStatsByRoundId(roundId int) (*models.RoundStats, er
 	return models.RoundStatsById(r.db, id)
 }
 
-func (r *repository) GetRoundHitStats(roundId int) ([]*models.RoundHitStats, error) {
+func (r *repository) GetRoundHitStats(roundId int) (*PaginationResponse[models.RoundHitStats], error) {
 	sqlStmt := `SELECT id FROM round_hit_stats WHERE round_id = ?`
 
 	ids := make([]int, 0)
@@ -68,10 +71,13 @@ func (r *repository) GetRoundHitStats(roundId int) ([]*models.RoundHitStats, err
 		roundHitStats = append(roundHitStats, rhs)
 	}
 
-	return roundHitStats, nil
+	return &PaginationResponse[models.RoundHitStats]{
+		Items: roundHitStats,
+		Total: int64(len(roundHitStats)),
+	}, nil
 }
 
-func (r *repository) GetUserHitStats(userId int) ([]*models.RoundHitStats, error) {
+func (r *repository) GetUserHitStats(userId int) (*PaginationResponse[models.RoundHitStats], error) {
 	sqlStmt := `
 		SELECT rhs.id
 		FROM round_hit_stats rhs
@@ -94,5 +100,8 @@ func (r *repository) GetUserHitStats(userId int) ([]*models.RoundHitStats, error
 		roundHitStats = append(roundHitStats, rhs)
 	}
 
-	return roundHitStats, nil
+	return &PaginationResponse[models.RoundHitStats]{
+		Items: roundHitStats,
+		Total: int64(len(roundHitStats)),
+	}, nil
 }

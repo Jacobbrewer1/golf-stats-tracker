@@ -343,8 +343,8 @@ func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respRounds := make([]*api.Round, 0)
-	for _, r := range rounds {
+	respRounds := make([]api.Round, 0)
+	for _, r := range rounds.Items {
 		respRound, err := s.roundById(r.Id)
 		if err != nil {
 			slog.Error("error getting round by id", slog.String(logging.KeyError, err.Error()))
@@ -352,10 +352,15 @@ func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		respRounds = append(respRounds, respRound)
+		respRounds = append(respRounds, *respRound)
 	}
 
-	err = uhttp.Encode(w, http.StatusOK, respRounds)
+	resp := &api.RoundsResponse{
+		Rounds: &respRounds,
+		Total:  utils.Ptr(rounds.Total),
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
 		slog.Error("error encoding response", slog.String(logging.KeyError, err.Error()))
 		return

@@ -9,6 +9,7 @@ import (
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
+	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 )
 
@@ -25,14 +26,19 @@ func (s *service) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, par
 		return
 	}
 
-	err = uhttp.Encode(w, http.StatusOK, courses)
+	resp := &api.CoursesResponse{
+		Courses: courses.Courses,
+		Total:   courses.Total,
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
 		slog.Error("failed to encode response", slog.String(logging.KeyError, err.Error()))
 		return
 	}
 }
 
-func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.Course, error) {
+func (s *service) getGolfDataCourses(ctx context.Context, name string) (*api.CoursesResponse, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, fmt.Sprintf("%s/courses", s.golfDataHost), nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create request: %w", err)
@@ -60,7 +66,7 @@ func (s *service) getGolfDataCourses(ctx context.Context, name string) ([]*api.C
 		return nil, fmt.Errorf("unexpected status code: %d", resp.StatusCode)
 	}
 
-	courses := make([]*api.Course, 0)
+	courses := new(api.CoursesResponse)
 	err = uhttp.DecodeJSON(resp.Body, &courses)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
@@ -88,11 +94,15 @@ func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, cour
 		if *details[i].Slope == *details[j].Slope {
 			return *details[i].Rating < *details[j].Rating
 		}
-
 		return *details[i].Slope < *details[j].Slope
 	})
 
-	err = uhttp.Encode(w, http.StatusOK, details)
+	resp := &api.CourseDetailsResponse{
+		Details: &details,
+		Total:   utils.Ptr(int64(len(details))),
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
 		slog.Error("failed to encode response", slog.String(logging.KeyError, err.Error()))
 		return

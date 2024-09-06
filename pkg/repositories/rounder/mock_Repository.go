@@ -159,23 +159,23 @@ func (_m *MockRepository) CreateUser(user *models.User) error {
 }
 
 // GetAllStatsForPar provides a mock function with given fields: userId, par
-func (_m *MockRepository) GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats, error) {
+func (_m *MockRepository) GetAllStatsForPar(userId int, par int64) (*PaginationResponse[HoleWithStats], error) {
 	ret := _m.Called(userId, par)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAllStatsForPar")
 	}
 
-	var r0 []*HoleWithStats
+	var r0 *PaginationResponse[HoleWithStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int, int64) ([]*HoleWithStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int, int64) (*PaginationResponse[HoleWithStats], error)); ok {
 		return rf(userId, par)
 	}
-	if rf, ok := ret.Get(0).(func(int, int64) []*HoleWithStats); ok {
+	if rf, ok := ret.Get(0).(func(int, int64) *PaginationResponse[HoleWithStats]); ok {
 		r0 = rf(userId, par)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*HoleWithStats)
+			r0 = ret.Get(0).(*PaginationResponse[HoleWithStats])
 		}
 	}
 
@@ -309,23 +309,23 @@ func (_m *MockRepository) GetRoundDetailsByRoundId(roundId int) (*RoundDetails, 
 }
 
 // GetRoundHitStats provides a mock function with given fields: roundId
-func (_m *MockRepository) GetRoundHitStats(roundId int) ([]*models.RoundHitStats, error) {
+func (_m *MockRepository) GetRoundHitStats(roundId int) (*PaginationResponse[models.RoundHitStats], error) {
 	ret := _m.Called(roundId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRoundHitStats")
 	}
 
-	var r0 []*models.RoundHitStats
+	var r0 *PaginationResponse[models.RoundHitStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[models.RoundHitStats], error)); ok {
 		return rf(roundId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[models.RoundHitStats]); ok {
 		r0 = rf(roundId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RoundHitStats)
+			r0 = ret.Get(0).(*PaginationResponse[models.RoundHitStats])
 		}
 	}
 
@@ -339,23 +339,23 @@ func (_m *MockRepository) GetRoundHitStats(roundId int) ([]*models.RoundHitStats
 }
 
 // GetRoundHitStatsByRoundStatsId provides a mock function with given fields: roundStatsId
-func (_m *MockRepository) GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models.RoundHitStats, error) {
+func (_m *MockRepository) GetRoundHitStatsByRoundStatsId(roundStatsId int) (*PaginationResponse[models.RoundHitStats], error) {
 	ret := _m.Called(roundStatsId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRoundHitStatsByRoundStatsId")
 	}
 
-	var r0 []*models.RoundHitStats
+	var r0 *PaginationResponse[models.RoundHitStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[models.RoundHitStats], error)); ok {
 		return rf(roundStatsId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[models.RoundHitStats]); ok {
 		r0 = rf(roundStatsId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RoundHitStats)
+			r0 = ret.Get(0).(*PaginationResponse[models.RoundHitStats])
 		}
 	}
 
@@ -369,23 +369,23 @@ func (_m *MockRepository) GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*m
 }
 
 // GetRoundHoles provides a mock function with given fields: roundId
-func (_m *MockRepository) GetRoundHoles(roundId int) ([]*models.Hole, error) {
+func (_m *MockRepository) GetRoundHoles(roundId int) (*PaginationResponse[models.Hole], error) {
 	ret := _m.Called(roundId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRoundHoles")
 	}
 
-	var r0 []*models.Hole
+	var r0 *PaginationResponse[models.Hole]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*models.Hole, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[models.Hole], error)); ok {
 		return rf(roundId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*models.Hole); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[models.Hole]); ok {
 		r0 = rf(roundId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Hole)
+			r0 = ret.Get(0).(*PaginationResponse[models.Hole])
 		}
 	}
 
@@ -429,23 +429,23 @@ func (_m *MockRepository) GetRoundStatsByRoundId(roundId int) (*models.RoundStat
 }
 
 // GetRoundsByUserId provides a mock function with given fields: userId
-func (_m *MockRepository) GetRoundsByUserId(userId int) ([]*models.Round, error) {
+func (_m *MockRepository) GetRoundsByUserId(userId int) (*PaginationResponse[models.Round], error) {
 	ret := _m.Called(userId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetRoundsByUserId")
 	}
 
-	var r0 []*models.Round
+	var r0 *PaginationResponse[models.Round]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*models.Round, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[models.Round], error)); ok {
 		return rf(userId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*models.Round); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[models.Round]); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.Round)
+			r0 = ret.Get(0).(*PaginationResponse[models.Round])
 		}
 	}
 
@@ -459,23 +459,23 @@ func (_m *MockRepository) GetRoundsByUserId(userId int) ([]*models.Round, error)
 }
 
 // GetStatsByRoundId provides a mock function with given fields: userId, roundId
-func (_m *MockRepository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error) {
+func (_m *MockRepository) GetStatsByRoundId(userId int, roundId int) (*PaginationResponse[HoleWithStats], error) {
 	ret := _m.Called(userId, roundId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetStatsByRoundId")
 	}
 
-	var r0 []*HoleWithStats
+	var r0 *PaginationResponse[HoleWithStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int, int) ([]*HoleWithStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int, int) (*PaginationResponse[HoleWithStats], error)); ok {
 		return rf(userId, roundId)
 	}
-	if rf, ok := ret.Get(0).(func(int, int) []*HoleWithStats); ok {
+	if rf, ok := ret.Get(0).(func(int, int) *PaginationResponse[HoleWithStats]); ok {
 		r0 = rf(userId, roundId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*HoleWithStats)
+			r0 = ret.Get(0).(*PaginationResponse[HoleWithStats])
 		}
 	}
 
@@ -489,23 +489,23 @@ func (_m *MockRepository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWit
 }
 
 // GetStatsByUserId provides a mock function with given fields: userId
-func (_m *MockRepository) GetStatsByUserId(userId int) ([]*RoundWithStats, error) {
+func (_m *MockRepository) GetStatsByUserId(userId int) (*PaginationResponse[RoundWithStats], error) {
 	ret := _m.Called(userId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetStatsByUserId")
 	}
 
-	var r0 []*RoundWithStats
+	var r0 *PaginationResponse[RoundWithStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*RoundWithStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[RoundWithStats], error)); ok {
 		return rf(userId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*RoundWithStats); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[RoundWithStats]); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*RoundWithStats)
+			r0 = ret.Get(0).(*PaginationResponse[RoundWithStats])
 		}
 	}
 
@@ -519,23 +519,23 @@ func (_m *MockRepository) GetStatsByUserId(userId int) ([]*RoundWithStats, error
 }
 
 // GetUserHitStats provides a mock function with given fields: userId
-func (_m *MockRepository) GetUserHitStats(userId int) ([]*models.RoundHitStats, error) {
+func (_m *MockRepository) GetUserHitStats(userId int) (*PaginationResponse[models.RoundHitStats], error) {
 	ret := _m.Called(userId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetUserHitStats")
 	}
 
-	var r0 []*models.RoundHitStats
+	var r0 *PaginationResponse[models.RoundHitStats]
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) ([]*models.RoundHitStats, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (*PaginationResponse[models.RoundHitStats], error)); ok {
 		return rf(userId)
 	}
-	if rf, ok := ret.Get(0).(func(int) []*models.RoundHitStats); ok {
+	if rf, ok := ret.Get(0).(func(int) *PaginationResponse[models.RoundHitStats]); ok {
 		r0 = rf(userId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*models.RoundHitStats)
+			r0 = ret.Get(0).(*PaginationResponse[models.RoundHitStats])
 		}
 	}
 

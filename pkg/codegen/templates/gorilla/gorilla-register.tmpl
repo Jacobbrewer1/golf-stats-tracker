@@ -61,7 +61,6 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
     router.Use(uhttp.AuthHeaderToContextMux())
     router.Use(uhttp.RequestIDToContextMux())
 
-    // We do not have a gateway preparer here as no auth is sent.
     {{ range . }}
         {{- $unauth := not .Spec.Security }}
         {{- if $unauth }}

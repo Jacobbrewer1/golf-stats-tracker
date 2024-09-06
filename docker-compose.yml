@@ -20,8 +20,8 @@ services:
     restart: always
     environment:
       MARIADB_ROOT_PASSWORD: Password01
-      MARIADB_DATABASE: spuk
-      MARIADB_USER: spuk-user
+      MARIADB_DATABASE: golfstats
+      MARIADB_USER: stats-user
       MARIADB_PASSWORD: Password01
     ports:
       - "3306:3306"
