@@ -18,7 +18,7 @@ func (r *repository) CreateHole(hole *models.Hole) error {
 	return hole.Insert(r.db)
 }
 
-func (r *repository) GetRoundHoles(roundId int) ([]*models.Hole, error) {
+func (r *repository) GetRoundHoles(roundId int) (*PaginationResponse[models.Hole], error) {
 	sqlStmt := `
 	SELECT h.id
 	FROM hole h
@@ -47,7 +47,10 @@ func (r *repository) GetRoundHoles(roundId int) ([]*models.Hole, error) {
 		holes = append(holes, h)
 	}
 
-	return holes, nil
+	return &PaginationResponse[models.Hole]{
+		Items: holes,
+		Total: int64(len(holes)),
+	}, nil
 }
 
 func (r *repository) GetHoleStatsByHoleId(holeId int) (*models.HoleStats, error) {
@@ -85,7 +88,7 @@ func (r *repository) SaveHoleStats(holeStats *models.HoleStats) error {
 	return nil
 }
 
-func (r *repository) GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats, error) {
+func (r *repository) GetAllStatsForPar(userId int, par int64) (*PaginationResponse[HoleWithStats], error) {
 	sqlStmt := `
 	SELECT
 	    r.id AS round_id,
@@ -134,7 +137,10 @@ func (r *repository) GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats,
 		})
 	}
 
-	return holeStats, nil
+	return &PaginationResponse[HoleWithStats]{
+		Items: holeStats,
+		Total: int64(len(holeStats)),
+	}, nil
 }
 
 func (r *repository) CountHolesByRoundAndPar(roundId int, par int64) (int, error) {
@@ -156,7 +162,7 @@ func (r *repository) CountHolesByRoundAndPar(roundId int, par int64) (int, error
 	return count, nil
 }
 
-func (r *repository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error) {
+func (r *repository) GetStatsByRoundId(userId int, roundId int) (*PaginationResponse[HoleWithStats], error) {
 	sqlStmt := `
 	SELECT
 		s.id AS stats_id
@@ -204,7 +210,10 @@ func (r *repository) GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStat
 		})
 	}
 
-	return holeStats, nil
+	return &PaginationResponse[HoleWithStats]{
+		Items: holeStats,
+		Total: int64(len(holeStats)),
+	}, nil
 }
 
 func (r *repository) CountHolesByRoundId(roundId int) (int, error) {
@@ -225,7 +234,7 @@ func (r *repository) CountHolesByRoundId(roundId int) (int, error) {
 	return count, nil
 }
 
-func (r *repository) GetStatsByUserId(userId int) ([]*RoundWithStats, error) {
+func (r *repository) GetStatsByUserId(userId int) (*PaginationResponse[RoundWithStats], error) {
 	sqlStmt := `
 	SELECT
 		rs.id AS stats_id,
@@ -278,5 +287,8 @@ func (r *repository) GetStatsByUserId(userId int) ([]*RoundWithStats, error) {
 		})
 	}
 
-	return holeStats, nil
+	return &PaginationResponse[RoundWithStats]{
+		Items: holeStats,
+		Total: int64(len(holeStats)),
+	}, nil
 }

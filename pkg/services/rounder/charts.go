@@ -47,7 +47,7 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	// If the "from_date" parameter is set, filter the data.
 	if params.FromDate != nil {
 		slog.Debug("Filtering line chart data by from_date", slog.String("from_date", params.FromDate.String()))
-		lineChartData = filterRoundStatsByDate(lineChartData, params.FromDate.Time)
+		lineChartData.Items = filterRoundStatsByDate(lineChartData.Items, params.FromDate.Time)
 	}
 
 	// If the "since" parameter is set, filter the data.
@@ -60,14 +60,14 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 
 		// Calculate the date that is "since" the current date.
 		fromDate := time.Now().Add(-duration)
-		lineChartData = filterRoundStatsByDate(lineChartData, fromDate)
+		lineChartData.Items = filterRoundStatsByDate(lineChartData.Items, fromDate)
 	}
 
 	data := make(map[string]float64)
 	teeTimeMap := make(map[string]time.Time)
 
 	// Fill up the map with the requested data.
-	for _, d := range lineChartData {
+	for _, d := range lineChartData.Items {
 		xVal := fmt.Sprintf("%s - %s", d.Course.Name, d.Round.TeeTime.Format(time.DateOnly))
 		if _, ok := teeTimeMap[xVal]; !ok {
 			teeTimeMap[xVal] = d.Round.TeeTime
@@ -91,17 +91,22 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	}
 
 	// Create the response.
-	resp := make([]*api.ChartDataPoint, 0)
+	respArray := make([]api.ChartDataPoint, 0)
 	for key, value := range data {
-		resp = append(resp, &api.ChartDataPoint{
+		respArray = append(respArray, api.ChartDataPoint{
 			X: utils.Ptr(key),
 			Y: utils.Ptr(float32(value)),
 		})
 	}
 
-	sort.Slice(resp, func(i, j int) bool {
-		return teeTimeMap[*resp[i].X].Before(teeTimeMap[*resp[j].X])
+	sort.Slice(respArray, func(i, j int) bool {
+		return teeTimeMap[*respArray[i].X].Before(teeTimeMap[*respArray[j].X])
 	})
+
+	resp := &api.ChartDataResponse{
+		Data:  &respArray,
+		Total: utils.Ptr(int64(len(respArray))),
+	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
@@ -150,7 +155,7 @@ func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	// Fill up the map with the requested data.
-	for _, d := range userRounds {
+	for _, d := range userRounds.Items {
 		if string(d.Type) != hitType {
 			continue
 		}
@@ -167,12 +172,17 @@ func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	// Create the response.
-	resp := make([]*api.ChartDataPoint, 0)
+	respArray := make([]api.ChartDataPoint, 0)
 	for key, value := range data {
-		resp = append(resp, &api.ChartDataPoint{
+		respArray = append(respArray, api.ChartDataPoint{
 			X: utils.Ptr(key),
 			Y: utils.Ptr(float32(value)),
 		})
+	}
+
+	resp := &api.ChartDataResponse{
+		Data:  &respArray,
+		Total: utils.Ptr(int64(len(respArray))),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

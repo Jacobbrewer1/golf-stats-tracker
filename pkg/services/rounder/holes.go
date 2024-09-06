@@ -42,7 +42,10 @@ func (s *service) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId 
 	if err != nil {
 		switch {
 		case errors.Is(err, repo.ErrNoHolesFound):
-			holes = make([]*models.Hole, 0)
+			holes = &repo.PaginationResponse[models.Hole]{
+				Items: make([]*models.Hole, 0),
+				Total: 0,
+			}
 		default:
 			slog.Error("Error getting holes", slog.String(logging.KeyError, err.Error()))
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting holes", err)
@@ -51,12 +54,17 @@ func (s *service) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId 
 	}
 
 	// Map the holes to the API model.
-	respHoles := make([]*api.Hole, len(holes))
-	for i, hole := range holes {
-		respHoles[i] = modelHoleAsApiRoundHole(hole)
+	respHoles := make([]api.Hole, len(holes.Items))
+	for i, hole := range holes.Items {
+		respHoles[i] = *modelHoleAsApiRoundHole(hole)
 	}
 
-	err = uhttp.Encode(w, http.StatusOK, respHoles)
+	resp := &api.HolesResponse{
+		Holes: &respHoles,
+		Total: utils.Ptr(holes.Total),
+	}
+
+	err = uhttp.Encode(w, http.StatusOK, resp)
 	if err != nil {
 		slog.Error("Error encoding holes", slog.String(logging.KeyError, err.Error()))
 		return
@@ -265,7 +273,7 @@ func (s *service) calculateStats(userId int, roundId int) error {
 	totalScorePar5 := 0
 	totalPar5 := 0
 
-	for _, data := range roundData {
+	for _, data := range roundData.Items {
 		penalties += data.Stats.Penalties
 		totalPutts += data.Stats.Putts
 		if string(data.Stats.FairwayHit) != models.HoleStatsFairwayHitNOTAPPLICABLE {
@@ -292,9 +300,9 @@ func (s *service) calculateStats(userId int, roundId int) error {
 	}
 
 	// Calculate the averages
-	averagePutts := float64(totalPutts) / float64(len(roundData))
+	averagePutts := float64(totalPutts) / float64(len(roundData.Items))
 	averageFairwayHit := (float64(totalFairwayHit) / float64(totalFairwayCount)) * 100
-	averageGreenHit := (float64(totalGreenHit) / float64(len(roundData))) * 100
+	averageGreenHit := (float64(totalGreenHit) / float64(len(roundData.Items))) * 100
 	avgPar3 := float64(totalScorePar3) / float64(totalPar3)
 	avgPar4 := float64(totalScorePar4) / float64(totalPar4)
 	avgPar5 := float64(totalScorePar5) / float64(totalPar5)
@@ -337,7 +345,7 @@ func (s *service) calculatePieStats(roundId int) error {
 	fairwayData := make(map[string]int)
 	greenData := make(map[string]int)
 
-	for _, h := range holes {
+	for _, h := range holes.Items {
 		stats, err := s.r.GetHoleStatsByHoleId(h.Id)
 		if err != nil {
 			return fmt.Errorf("error getting hole stats: %w", err)
@@ -355,7 +363,7 @@ func (s *service) calculatePieStats(roundId int) error {
 	fairwayHitStatIds := make(map[string]int)
 	greenHitStatIds := make(map[string]int)
 
-	for _, hitStat := range currentHitStats {
+	for _, hitStat := range currentHitStats.Items {
 		switch string(hitStat.Type) {
 		case models.RoundHitStatsTypeFAIRWAY:
 			fairwayHitStatIds[hitStat.Miss] = hitStat.Id

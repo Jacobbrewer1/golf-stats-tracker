@@ -28,10 +28,10 @@ type Repository interface {
 	GetRoundDetailsByRoundId(roundId int) (*RoundDetails, error)
 
 	// GetRoundsByUserId gets the rounds for a user.
-	GetRoundsByUserId(userId int) ([]*models.Round, error)
+	GetRoundsByUserId(userId int) (*PaginationResponse[models.Round], error)
 
 	// GetRoundHoles gets the holes for a round.
-	GetRoundHoles(roundId int) ([]*models.Hole, error)
+	GetRoundHoles(roundId int) (*PaginationResponse[models.Hole], error)
 
 	// GetHoleById gets a hole by its ID.
 	GetHoleById(id int) (*models.Hole, error)
@@ -43,13 +43,13 @@ type Repository interface {
 	SaveHoleStats(holeStats *models.HoleStats) error
 
 	// GetAllStatsForPar gets all stats for a user.
-	GetAllStatsForPar(userId int, par int64) ([]*HoleWithStats, error)
+	GetAllStatsForPar(userId int, par int64) (*PaginationResponse[HoleWithStats], error)
 
 	// CountHolesByRoundAndPar counts the number of holes for a round and par.
 	CountHolesByRoundAndPar(roundId int, par int64) (int, error)
 
 	// GetStatsByRoundId gets the stats for a user.
-	GetStatsByRoundId(userId int, roundId int) ([]*HoleWithStats, error)
+	GetStatsByRoundId(userId int, roundId int) (*PaginationResponse[HoleWithStats], error)
 
 	// CountHolesByRoundId counts the number of holes for a round.
 	CountHolesByRoundId(roundId int) (int, error)
@@ -61,19 +61,19 @@ type Repository interface {
 	GetRoundStatsByRoundId(roundId int) (*models.RoundStats, error)
 
 	// GetStatsByUserId gets all stats for a user.
-	GetStatsByUserId(userId int) ([]*RoundWithStats, error)
+	GetStatsByUserId(userId int) (*PaginationResponse[RoundWithStats], error)
 
 	// SaveRoundHitStats saves the hit stats for a round.
 	SaveRoundHitStats(roundHitStats ...*models.RoundHitStats) error
 
 	// GetRoundHitStatsByRoundStatsId gets the hit stats for a round.
-	GetRoundHitStatsByRoundStatsId(roundStatsId int) ([]*models.RoundHitStats, error)
+	GetRoundHitStatsByRoundStatsId(roundStatsId int) (*PaginationResponse[models.RoundHitStats], error)
 
 	// GetRoundHitStats gets the hit stats for a round.
-	GetRoundHitStats(roundId int) ([]*models.RoundHitStats, error)
+	GetRoundHitStats(roundId int) (*PaginationResponse[models.RoundHitStats], error)
 
 	// GetUserHitStats gets the hit stats for a user.
-	GetUserHitStats(userId int) ([]*models.RoundHitStats, error)
+	GetUserHitStats(userId int) (*PaginationResponse[models.RoundHitStats], error)
 }
 
 type HoleWithStats struct {

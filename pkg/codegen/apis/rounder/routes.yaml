@@ -99,9 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/course'
+                $ref: '#/components/schemas/courses_response'
         '400':
           description: Bad request
           content:
@@ -129,7 +127,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/course_details'
+                $ref: '#/components/schemas/course_details_response'
         '400':
           description: Bad request
           content:
@@ -191,9 +189,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/round'
+                $ref: '#/components/schemas/rounds_response'
         '401':
           description: Unauthorized
           content:
@@ -221,9 +217,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/hole'
+                $ref: '#/components/schemas/holes_response'
         '401':
           description: Unauthorized
           content:
@@ -357,9 +351,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/chart_data_point'
+                $ref: '#/components/schemas/chart_data_response'
         '401':
           description: Unauthorized
           content:
@@ -445,6 +437,18 @@ components:
         $ref: '#/components/schemas/average_type'
 
   schemas:
+    chart_data_response:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/chart_data_point'
+        total:
+          type: integer
+          format: int64
+          example: 1
+
     chart_data_point:
       type: object
       properties:
@@ -522,6 +526,18 @@ components:
           format: date-time
           description: The tee time
 
+    rounds_response:
+      type: object
+      properties:
+        rounds:
+          type: array
+          items:
+            $ref: '#/components/schemas/round'
+        total:
+          type: integer
+          format: int64
+          example: 1
+
     round:
       type: object
       properties:
@@ -566,6 +582,18 @@ components:
           type: string
           example: EX1 1MP
 
+    courses_response:
+      type: object
+      properties:
+        courses:
+          type: array
+          items:
+            $ref: '#/components/schemas/course'
+        total:
+          type: integer
+          format: int64
+          example: 1
+
     course:
       type: object
       properties:
@@ -580,6 +608,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/course_details'
+
+    course_details_response:
+      type: object
+      properties:
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/course_details'
+        total:
+          type: integer
+          format: int64
+          example: 1
 
     course_details:
       type: object
@@ -639,6 +679,18 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/hole'
+
+    holes_response:
+      type: object
+      properties:
+        holes:
+          type: array
+          items:
+            $ref: '#/components/schemas/hole'
+        total:
+          type: integer
+          format: int64
+          example: 1
 
     hole:
       type: object
