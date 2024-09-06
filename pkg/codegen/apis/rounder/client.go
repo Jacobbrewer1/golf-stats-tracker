@@ -1003,7 +1003,7 @@ func (r GetNewRoundMarkerResponse) StatusCode() int {
 type GetLineChartAveragesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *[]ChartDataPoint
+	JSON200      *ChartDataResponse
 	JSON401      *externalRef0.Message
 	JSON500      *externalRef0.ErrorMessage
 }
@@ -1507,7 +1507,7 @@ func ParseGetLineChartAveragesResponse(rsp *http.Response) (*GetLineChartAverage
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest []ChartDataPoint
+		var dest ChartDataResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

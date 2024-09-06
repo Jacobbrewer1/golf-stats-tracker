@@ -84,12 +84,12 @@ type HitInRegulation = string
 
 // List of HitInRegulation
 const (
-	HitInRegulation_HIT            HitInRegulation = "HIT"
-	HitInRegulation_LEFT           HitInRegulation = "LEFT"
-	HitInRegulation_LONG           HitInRegulation = "LONG"
-	HitInRegulation_NOT_APPLICABLE HitInRegulation = "NOT_APPLICABLE"
-	HitInRegulation_RIGHT          HitInRegulation = "RIGHT"
-	HitInRegulation_SHORT          HitInRegulation = "SHORT"
+	HitInRegulation_hit            HitInRegulation = "hit"
+	HitInRegulation_left           HitInRegulation = "left"
+	HitInRegulation_long           HitInRegulation = "long"
+	HitInRegulation_not_applicable HitInRegulation = "not_applicable"
+	HitInRegulation_right          HitInRegulation = "right"
+	HitInRegulation_short          HitInRegulation = "short"
 )
 
 // Hole defines the model for hole.

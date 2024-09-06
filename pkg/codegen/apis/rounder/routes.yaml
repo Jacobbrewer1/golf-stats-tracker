@@ -321,9 +321,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/chart_data_point'
+                $ref: '#/components/schemas/chart_data_response'
         '401':
           description: Unauthorized
           content:
@@ -723,12 +721,12 @@ components:
     hit_in_regulation:
       type: string
       enum:
-        - HIT
-        - LEFT
-        - RIGHT
-        - SHORT
-        - LONG
-        - NOT_APPLICABLE
+        - hit
+        - left
+        - right
+        - short
+        - long
+        - not_applicable
 
     average_type:
       type: string

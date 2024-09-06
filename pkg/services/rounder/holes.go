@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 	"sync"
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
@@ -438,14 +439,14 @@ func apiAsModelHoleStats(stats *api.HoleStats) (*models.HoleStats, error) {
 	if stats.FairwayHit == nil {
 		return nil, errors.New("fairway_hit is required")
 	}
-	s.FairwayHit = usql.NewEnum(*stats.FairwayHit)
+	s.FairwayHit = usql.NewEnum(strings.ToUpper(*stats.FairwayHit))
 
 	if stats.GreenHit == nil {
 		return nil, errors.New("green_hit is required")
-	} else if *stats.GreenHit == api.HitInRegulation_NOT_APPLICABLE {
+	} else if *stats.GreenHit == api.HitInRegulation_not_applicable {
 		return nil, errors.New("green_hit cannot be NOT_APPLICABLE")
 	}
-	s.GreenHit = usql.NewEnum(*stats.GreenHit)
+	s.GreenHit = usql.NewEnum(strings.ToUpper(*stats.GreenHit))
 
 	if stats.Putts == nil {
 		return nil, errors.New("putts is required")
