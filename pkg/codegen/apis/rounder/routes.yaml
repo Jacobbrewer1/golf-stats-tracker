@@ -321,9 +321,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/chart_data_point'
+                $ref: '#/components/schemas/chart_data_response'
         '401':
           description: Unauthorized
           content:
