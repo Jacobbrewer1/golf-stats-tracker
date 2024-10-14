@@ -44,15 +44,15 @@ type ChartDataResponse struct {
 
 // Course defines the model for course.
 type Course struct {
-	Details *[]CourseDetails `json:"details,omitempty"`
-	Id      *int64           `json:"id,omitempty"`
-	Name    *string          `json:"name,omitempty"`
+	Details []CourseDetails `json:"details"`
+	Id      int64           `json:"id"`
+	Name    string          `json:"name"`
 }
 
 // CourseDetails defines the model for course_details.
 type CourseDetails struct {
-	Holes            *[]Hole  `json:"holes,omitempty"`
-	Id               *int64   `json:"id,omitempty"`
+	Holes            []Hole   `json:"holes"`
+	Id               int64    `json:"id"`
 	Marker           *string  `json:"marker,omitempty"`
 	MetersBackNine   *int64   `json:"meters_back_nine,omitempty"`
 	MetersFrontNine  *int64   `json:"meters_front_nine,omitempty"`

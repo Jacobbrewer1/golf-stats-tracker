@@ -114,8 +114,8 @@ func (s *service) importCourse(ctx context.Context, roundId int, courseId int, m
 	details := new(models.CourseDetails)
 	holes := make([]*models.Hole, 0)
 	found := false
-	for _, d := range *course.Details {
-		if *d.Id != int64(markerId) {
+	for _, d := range course.Details {
+		if d.Id != int64(markerId) {
 			continue
 		}
 
@@ -128,7 +128,7 @@ func (s *service) importCourse(ctx context.Context, roundId int, courseId int, m
 			return errors.New("holes are required")
 		}
 
-		for _, h := range *d.Holes {
+		for _, h := range d.Holes {
 			hole, err := s.holeAsModel(&h)
 			if err != nil {
 				return fmt.Errorf("error mapping hole to model: %w", err)
@@ -206,12 +206,7 @@ func (s *service) holeAsModel(hole *api.Hole) (*models.Hole, error) {
 
 func (s *service) courseAsModel(course *api.Course) (*models.Course, error) {
 	c := new(models.Course)
-
-	if course.Name == nil {
-		return nil, errors.New("name is required")
-	}
-	c.Name = *course.Name
-
+	c.Name = course.Name
 	return c, nil
 }
 

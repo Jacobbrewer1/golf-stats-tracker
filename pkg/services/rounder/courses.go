@@ -83,7 +83,7 @@ func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, cour
 	}
 
 	details := make([]api.CourseDetails, 0)
-	details = append(details, *marker.Details...)
+	details = append(details, marker.Details...)
 
 	for i := range details {
 		details[i].Holes = nil

@@ -602,6 +602,10 @@ components:
 
     course:
       type: object
+      required:
+        - id
+        - name
+        - details
       properties:
         id:
           type: integer
@@ -632,6 +636,9 @@ components:
 
     course_details:
       type: object
+      required:
+        - id
+        - holes
       properties:
         id:
           type: integer
