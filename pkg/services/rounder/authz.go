@@ -10,7 +10,7 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 	"github.com/Jacobbrewer1/vaulty"
 	"github.com/spf13/viper"
 )
@@ -161,7 +161,7 @@ func (a *authz) WithAuthorization(r *http.Request) (*http.Request, error) {
 		return nil, errors.New("invalid password")
 	}
 
-	r = r.WithContext(uhttp.UserIdToContext(r.Context(), user.Id))
+	r = r.WithContext(utils.UserIdToContext(r.Context(), user.Id))
 
 	return r, nil
 }

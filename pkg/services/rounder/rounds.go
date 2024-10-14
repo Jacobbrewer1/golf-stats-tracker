@@ -12,8 +12,8 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 	usql "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/sql"
+	"github.com/Jacobbrewer1/uhttp"
 )
 
 func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rnd := new(api.RoundCreate)
-	err := uhttp.DecodeJSONBody(r, rnd)
+	err := uhttp.DecodeRequestJSON(r, rnd)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error decoding request body", err)
 		return
@@ -34,7 +34,7 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 	if userId <= 0 {
 		slog.Debug("user_id not found in context")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "user_id not found in context")
@@ -329,7 +329,7 @@ func (s *service) roundAsModel(rnd *api.RoundCreate, userId int) (*models.Round,
 }
 
 func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 	if userId <= 0 {
 		slog.Debug("user_id not found in context")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "user_id not found in context")

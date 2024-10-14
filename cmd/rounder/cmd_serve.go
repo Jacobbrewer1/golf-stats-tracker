@@ -14,7 +14,7 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	svc "github.com/Jacobbrewer1/golf-stats-tracker/pkg/services/rounder"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 	"github.com/Jacobbrewer1/vaulty"
 	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/google/subcommands"
