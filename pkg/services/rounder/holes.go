@@ -33,7 +33,7 @@ func (s *service) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId 
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round", err)
 			return
 		}
-	} else if round.UserId != uhttp.UserIdFromContext(r.Context()) {
+	} else if round.UserId != utils.UserIdFromContext(r.Context()) {
 		uhttp.SendMessageWithStatus(w, http.StatusForbidden, "round not found")
 		return
 	}
@@ -61,8 +61,8 @@ func (s *service) GetRoundHoles(w http.ResponseWriter, r *http.Request, roundId 
 	}
 
 	resp := &api.HolesResponse{
-		Holes: &respHoles,
-		Total: utils.Ptr(holes.Total),
+		Holes: respHoles,
+		Total: holes.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
@@ -97,7 +97,7 @@ func (s *service) GetHoleStats(w http.ResponseWriter, r *http.Request, roundId a
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round", err)
 			return
 		}
-	} else if round.UserId != uhttp.UserIdFromContext(r.Context()) {
+	} else if round.UserId != utils.UserIdFromContext(r.Context()) {
 		uhttp.SendMessageWithStatus(w, http.StatusForbidden, "round not found")
 		return
 	}
@@ -170,7 +170,7 @@ func (s *service) UpdateHoleStats(w http.ResponseWriter, r *http.Request, roundI
 			uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error getting round", err)
 			return
 		}
-	} else if round.UserId != uhttp.UserIdFromContext(r.Context()) {
+	} else if round.UserId != utils.UserIdFromContext(r.Context()) {
 		uhttp.SendMessageWithStatus(w, http.StatusForbidden, "round not found")
 		return
 	}

@@ -356,8 +356,8 @@ func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := &api.RoundsResponse{
-		Rounds: &respRounds,
-		Total:  utils.Ptr(rounds.Total),
+		Rounds: respRounds,
+		Total:  rounds.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

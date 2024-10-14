@@ -38,8 +38,8 @@ type ChartDataPoint struct {
 
 // ChartDataResponse defines the model for chart_data_response.
 type ChartDataResponse struct {
-	Data  *[]ChartDataPoint `json:"data,omitempty"`
-	Total *int64            `json:"total,omitempty"`
+	Data  []ChartDataPoint `json:"data"`
+	Total int64            `json:"total"`
 }
 
 // Course defines the model for course.
@@ -69,14 +69,14 @@ type CourseDetails struct {
 
 // CourseDetailsResponse defines the model for course_details_response.
 type CourseDetailsResponse struct {
-	Details *[]CourseDetails `json:"details,omitempty"`
-	Total   *int64           `json:"total,omitempty"`
+	Details []CourseDetails `json:"details"`
+	Total   int64           `json:"total"`
 }
 
 // CoursesResponse defines the model for courses_response.
 type CoursesResponse struct {
-	Courses *[]Course `json:"courses,omitempty"`
-	Total   *int64    `json:"total,omitempty"`
+	Courses []Course `json:"courses"`
+	Total   int64    `json:"total"`
 }
 
 // HitInRegulation defines the model for hit_in_regulation.
@@ -122,8 +122,8 @@ type HoleStats struct {
 
 // HolesResponse defines the model for holes_response.
 type HolesResponse struct {
-	Holes *[]Hole `json:"holes,omitempty"`
-	Total *int64  `json:"total,omitempty"`
+	Holes []Hole `json:"holes"`
+	Total int64  `json:"total"`
 }
 
 // Round defines the model for round.
@@ -158,8 +158,8 @@ type RoundCreate struct {
 
 // RoundsResponse defines the model for rounds_response.
 type RoundsResponse struct {
-	Rounds *[]Round `json:"rounds,omitempty"`
-	Total  *int64   `json:"total,omitempty"`
+	Rounds []Round `json:"rounds"`
+	Total  int64   `json:"total"`
 }
 
 // Token defines the model for token.

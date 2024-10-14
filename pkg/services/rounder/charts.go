@@ -104,8 +104,8 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	})
 
 	resp := &api.ChartDataResponse{
-		Data:  &respArray,
-		Total: utils.Ptr(int64(len(respArray))),
+		Data:  respArray,
+		Total: int64(len(respArray)),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
@@ -181,8 +181,8 @@ func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	resp := &api.ChartDataResponse{
-		Data:  &respArray,
-		Total: utils.Ptr(int64(len(respArray))),
+		Data:  respArray,
+		Total: int64(len(respArray)),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

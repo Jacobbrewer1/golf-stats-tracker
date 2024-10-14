@@ -575,6 +575,41 @@ func wrapHandler(handler http.HandlerFunc, middlewares ...mux.MiddlewareFunc) ht
 	return wrappedHandler
 }
 
+// RegisterHandlers registers the api handlers.
+func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
+	wrapper := ServerInterfaceWrapper{
+		handler: si,
+	}
+
+	for _, opt := range opts {
+		if opt == nil {
+			continue
+		}
+		opt(&wrapper)
+	}
+
+	router.Use(uhttp.AuthHeaderToContextMux())
+	router.Use(uhttp.GenerateOrCopyRequestIDMux())
+
+	router.Methods(http.MethodGet).Path("/rounds").Handler(wrapHandler(wrapper.GetRounds))
+
+	router.Methods(http.MethodPost).Path("/rounds").Handler(wrapHandler(wrapper.CreateRound))
+
+	router.Methods(http.MethodGet).Path("/rounds/new/courses").Handler(wrapHandler(wrapper.GetNewRoundCourses))
+
+	router.Methods(http.MethodGet).Path("/rounds/new/marker/{course_id}").Handler(wrapHandler(wrapper.GetNewRoundMarker))
+
+	router.Methods(http.MethodGet).Path("/rounds/stats/charts/line/averages").Handler(wrapHandler(wrapper.GetLineChartAverages))
+
+	router.Methods(http.MethodGet).Path("/rounds/stats/charts/pie/averages").Handler(wrapHandler(wrapper.GetPieChartAverages))
+
+	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes").Handler(wrapHandler(wrapper.GetRoundHoles))
+
+	router.Methods(http.MethodGet).Path("/rounds/{round_id}/holes/{hole_id}/stats").Handler(wrapHandler(wrapper.GetHoleStats))
+
+	router.Methods(http.MethodPost).Path("/rounds/{round_id}/holes/{hole_id}/stats").Handler(wrapHandler(wrapper.UpdateHoleStats))
+}
+
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
 func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
 	wrapper := ServerInterfaceWrapper{
