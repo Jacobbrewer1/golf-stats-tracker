@@ -9,8 +9,8 @@
       "path": "b3-prod-1-db/creds/readwrite"
     },
     "transit": {
-      "path_encrypt": "b3-prod-1-transit/encrypt/b3-prod-1-key",
-      "path_decrypt": "b3-prod-1-transit/decrypt/b3-prod-1-key"
+      "name": "b3-prod-1-transit",
+      "key": "b3-prod-1-key"
     }
   },
   "database": {

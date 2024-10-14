@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories"
+	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/alexliesenfeld/health"
 )
 

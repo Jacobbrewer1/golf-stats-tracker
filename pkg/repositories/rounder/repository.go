@@ -1,7 +1,7 @@
 package rounder
 
 import (
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories"
+	"github.com/Jacobbrewer1/vaulty/repositories"
 )
 
 type repository struct {

@@ -12,6 +12,7 @@ import (
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
 	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/vaulty"
 )
 
 func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -58,12 +59,15 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	u.Password = hashedPassword
 
 	// Encrypt the password with vault
-	encryptedPassword, err := s.vc.TransitEncrypt(r.Context(), u.Password)
+	encryptedPassword, err := s.vc.Path(
+		s.vip.GetString("vault.transit.key"),
+		vaulty.WithPrefix(s.vip.GetString("vault.transit.name")),
+	).TransitEncrypt(r.Context(), u.Password)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error encrypting password", err)
 		return
 	}
-	u.Password = encryptedPassword.Get("ciphertext").(string)
+	u.Password = vaulty.GetTransitCipherText(encryptedPassword)
 
 	if err := s.r.CreateUser(u); err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error creating user", err)

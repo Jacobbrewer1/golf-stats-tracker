@@ -2,9 +2,10 @@
 ## explicit; go 1.20
 filippo.io/edwards25519
 filippo.io/edwards25519/field
-# github.com/DATA-DOG/go-sqlmock v1.5.2
-## explicit; go 1.15
-github.com/DATA-DOG/go-sqlmock
+# github.com/Jacobbrewer1/vaulty v0.1.2
+## explicit; go 1.23
+github.com/Jacobbrewer1/vaulty
+github.com/Jacobbrewer1/vaulty/repositories
 # github.com/alexliesenfeld/health v0.8.0
 ## explicit; go 1.18
 github.com/alexliesenfeld/health
@@ -236,8 +237,8 @@ github.com/stretchr/testify/suite
 # github.com/subosito/gotenv v1.6.0
 ## explicit; go 1.18
 github.com/subosito/gotenv
-# github.com/vektra/mockery/v2 v2.45.0
-## explicit; go 1.22
+# github.com/vektra/mockery/v2 v2.46.2
+## explicit; go 1.23
 github.com/vektra/mockery/v2
 github.com/vektra/mockery/v2/cmd
 github.com/vektra/mockery/v2/pkg
