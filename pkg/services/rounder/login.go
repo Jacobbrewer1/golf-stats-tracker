@@ -10,7 +10,8 @@ import (
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
+	"github.com/Jacobbrewer1/vaulty"
 )
 
 func (s *service) Login(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +56,10 @@ func (s *service) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *service) checkPassword(ctx context.Context, password, hashedPassword string) error {
-	unhashedPassword, err := s.vc.TransitDecrypt(ctx, hashedPassword)
+	unhashedPassword, err := s.vc.Path(
+		s.vip.GetString("vault.transit.key"),
+		vaulty.WithPrefix(s.vip.GetString("vault.transit.name")),
+	).TransitDecrypt(ctx, hashedPassword)
 	if err != nil {
 		return fmt.Errorf("error decrypting password: %w", err)
 	}

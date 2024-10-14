@@ -12,8 +12,8 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
 	usql "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/sql"
+	"github.com/Jacobbrewer1/uhttp"
 )
 
 func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 	}
 
 	rnd := new(api.RoundCreate)
-	err := uhttp.DecodeJSONBody(r, rnd)
+	err := uhttp.DecodeRequestJSON(r, rnd)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error decoding request body", err)
 		return
@@ -34,7 +34,7 @@ func (s *service) CreateRound(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 	if userId <= 0 {
 		slog.Debug("user_id not found in context")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "user_id not found in context")
@@ -114,8 +114,8 @@ func (s *service) importCourse(ctx context.Context, roundId int, courseId int, m
 	details := new(models.CourseDetails)
 	holes := make([]*models.Hole, 0)
 	found := false
-	for _, d := range *course.Details {
-		if *d.Id != int64(markerId) {
+	for _, d := range course.Details {
+		if d.Id != int64(markerId) {
 			continue
 		}
 
@@ -128,7 +128,7 @@ func (s *service) importCourse(ctx context.Context, roundId int, courseId int, m
 			return errors.New("holes are required")
 		}
 
-		for _, h := range *d.Holes {
+		for _, h := range d.Holes {
 			hole, err := s.holeAsModel(&h)
 			if err != nil {
 				return fmt.Errorf("error mapping hole to model: %w", err)
@@ -206,12 +206,7 @@ func (s *service) holeAsModel(hole *api.Hole) (*models.Hole, error) {
 
 func (s *service) courseAsModel(course *api.Course) (*models.Course, error) {
 	c := new(models.Course)
-
-	if course.Name == nil {
-		return nil, errors.New("name is required")
-	}
-	c.Name = *course.Name
-
+	c.Name = course.Name
 	return c, nil
 }
 
@@ -329,7 +324,7 @@ func (s *service) roundAsModel(rnd *api.RoundCreate, userId int) (*models.Round,
 }
 
 func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 	if userId <= 0 {
 		slog.Debug("user_id not found in context")
 		uhttp.SendMessageWithStatus(w, http.StatusUnauthorized, "user_id not found in context")
@@ -356,8 +351,8 @@ func (s *service) GetRounds(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resp := &api.RoundsResponse{
-		Rounds: &respRounds,
-		Total:  utils.Ptr(rounds.Total),
+		Rounds: respRounds,
+		Total:  rounds.Total,
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

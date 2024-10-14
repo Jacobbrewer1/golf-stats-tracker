@@ -11,6 +11,14 @@ func wrapHandler(handler http.HandlerFunc, middlewares ...mux.MiddlewareFunc) ht
 	return wrappedHandler
 }
 
+{{ $unauthedExists := false }}
+{{ range . }}
+    {{ $auth := .Spec.Security }}
+    {{ if not $auth }}
+        {{ $unauthedExists = true }}
+    {{ end -}}
+{{ end -}}
+
 // RegisterHandlers registers the api handlers.
 func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOption) {
     wrapper := ServerInterfaceWrapper{
@@ -25,7 +33,7 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
     }
 
     router.Use(uhttp.AuthHeaderToContextMux())
-    router.Use(uhttp.RequestIDToContextMux())
+    router.Use(uhttp.GenerateOrCopyRequestIDMux())
 
 {{ range . }}
     {{- $authed := .Spec.Security }}
@@ -34,15 +42,6 @@ func RegisterHandlers(router *mux.Router, si ServerInterface, opts ...ServerOpti
     {{ end -}}
 {{ end -}}
 }
-
-
-{{ $unauthedExists := false}}
-{{ range . }}
-    {{ $unauth := not .Spec.Security }}
-    {{ if $unauth }}
-        {{ $unauthedExists = true }}
-    {{ end -}}
-{{ end -}}
 
 {{ if $unauthedExists }}
 // RegisterUnauthedHandlers registers any api handlers which do not have any authentication on them. Most services will not have any.
@@ -59,8 +58,9 @@ func RegisterUnauthedHandlers(router *mux.Router, si ServerInterface, opts ...Se
     }
 
     router.Use(uhttp.AuthHeaderToContextMux())
-    router.Use(uhttp.RequestIDToContextMux())
+    router.Use(uhttp.GenerateOrCopyRequestIDMux())
 
+    // We do not have a gateway preparer here as no auth is sent.
     {{ range . }}
         {{- $unauth := not .Spec.Security }}
         {{- if $unauth }}

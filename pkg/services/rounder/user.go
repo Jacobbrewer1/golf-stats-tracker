@@ -11,7 +11,8 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
+	"github.com/Jacobbrewer1/vaulty"
 )
 
 func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +22,7 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := new(api.User)
-	err := uhttp.DecodeJSONBody(r, user)
+	err := uhttp.DecodeRequestJSON(r, user)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error decoding request body", err)
 		return
@@ -45,7 +46,7 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	u, err := s.userAsModel(*user)
 	if err != nil {
-		uhttp.SendHttpError(w, err)
+		uhttp.SendErrorMessageWithStatus(w, http.StatusBadRequest, "error mapping user to model", err)
 		return
 	}
 
@@ -58,12 +59,15 @@ func (s *service) CreateUser(w http.ResponseWriter, r *http.Request) {
 	u.Password = hashedPassword
 
 	// Encrypt the password with vault
-	encryptedPassword, err := s.vc.TransitEncrypt(r.Context(), u.Password)
+	encryptedPassword, err := s.vc.Path(
+		s.vip.GetString("vault.transit.key"),
+		vaulty.WithPrefix(s.vip.GetString("vault.transit.name")),
+	).TransitEncrypt(r.Context(), u.Password)
 	if err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error encrypting password", err)
 		return
 	}
-	u.Password = encryptedPassword.Get("ciphertext").(string)
+	u.Password = vaulty.GetTransitCipherText(encryptedPassword)
 
 	if err := s.r.CreateUser(u); err != nil {
 		uhttp.SendErrorMessageWithStatus(w, http.StatusInternalServerError, "error creating user", err)
@@ -89,17 +93,17 @@ func (s *service) userAsModel(user api.User) (*models.User, error) {
 	u := new(models.User)
 
 	if user.Username == nil {
-		return nil, uhttp.NewHttpError(http.StatusBadRequest, "username is required")
+		return nil, utils.NewHttpError(http.StatusBadRequest, "username is required")
 	}
 	u.Username = strings.ToLower(*user.Username)
 
 	if user.Password == nil {
-		return nil, uhttp.NewHttpError(http.StatusBadRequest, "password is required")
+		return nil, utils.NewHttpError(http.StatusBadRequest, "password is required")
 	}
 	u.Password = *user.Password
 
 	if user.Name == nil {
-		return nil, uhttp.NewHttpError(http.StatusBadRequest, "name is required")
+		return nil, utils.NewHttpError(http.StatusBadRequest, "name is required")
 	}
 	u.Name = *user.Name
 

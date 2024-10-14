@@ -12,11 +12,11 @@ import (
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	svc "github.com/Jacobbrewer1/golf-stats-tracker/pkg/services/rounder"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/vault"
+	"github.com/Jacobbrewer1/uhttp"
+	"github.com/Jacobbrewer1/vaulty"
+	"github.com/Jacobbrewer1/vaulty/repositories"
 	"github.com/google/subcommands"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -107,35 +107,41 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 		return errors.New("vault configuration not found")
 	}
 
-	vaultDb := &repositories.VaultDB{
-		Client:         nil,
-		Vip:            v,
-		Enabled:        false,
-		CurrentSecrets: nil,
-	}
-
 	slog.Info("Vault configuration found, attempting to connect")
-	vaultDb.Enabled = true
 
-	vc, err := vault.NewClientUserPass(v)
+	vc, err := vaulty.NewClient(
+		vaulty.WithContext(ctx),
+		vaulty.WithGeneratedVaultClient(v.GetString("vault.address")),
+		vaulty.WithUserPassAuth(
+			v.GetString("vault.auth.username"),
+			v.GetString("vault.auth.password"),
+		),
+		vaulty.WithKvv2Mount(v.GetString("vault.kvv2_mount")),
+	)
 	if err != nil {
 		return fmt.Errorf("error creating vault client: %w", err)
 	}
 
-	vaultDb.Client = vc
-
 	slog.Debug("Vault client created")
 
-	vs, err := vc.GetSecret(ctx, v.GetString("vault.database.path"))
-	if errors.Is(err, vault.ErrSecretNotFound) {
+	vs, err := vc.Path(v.GetString("vault.database.role"), vaulty.WithPrefix(v.GetString("vault.database.path"))).GetSecret(ctx)
+	if errors.Is(err, vaulty.ErrSecretNotFound) {
 		return fmt.Errorf("secrets not found in vault: %s", v.GetString("vault.database.path"))
 	} else if err != nil {
 		return fmt.Errorf("error getting secrets from vault: %w", err)
 	}
 
-	slog.Debug("Vault secrets retrieved")
-	vaultDb.CurrentSecrets = vs
-	db, err := repositories.ConnectDB(ctx, vaultDb)
+	dbConnector, err := repositories.NewDatabaseConnector(
+		repositories.WithContext(ctx),
+		repositories.WithVaultClient(vc),
+		repositories.WithCurrentSecrets(vs),
+		repositories.WithViper(v),
+	)
+	if err != nil {
+		return fmt.Errorf("error creating database connector: %w", err)
+	}
+
+	db, err := dbConnector.ConnectDB()
 	if err != nil {
 		return fmt.Errorf("error connecting to database: %w", err)
 	}
@@ -143,8 +149,8 @@ func (s *serveCmd) setup(ctx context.Context, r *mux.Router) (err error) {
 	slog.Info("Database connection generate from vault secrets")
 
 	repository := repo.NewRepository(db)
-	service := svc.NewService(repository, vc, v.GetString("hosts.golfdata"))
-	svcAuthz := svc.NewAuthz(service, repository, vc)
+	service := svc.NewService(repository, vc, v.GetString("hosts.golfdata"), v)
+	svcAuthz := svc.NewAuthz(service, repository, vc, v)
 
 	r.HandleFunc("/metrics", uhttp.InternalOnly(promhttp.Handler())).Methods(http.MethodGet)
 	r.HandleFunc("/health", uhttp.InternalOnly(healthHandler(db))).Methods(http.MethodGet)

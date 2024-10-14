@@ -13,11 +13,11 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/models"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 )
 
 func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, params api.GetLineChartAveragesParams) {
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 
 	// Get the line chart data.
 	lineChartData, err := s.r.GetStatsByUserId(userId)
@@ -104,8 +104,8 @@ func (s *service) GetLineChartAverages(w http.ResponseWriter, r *http.Request, p
 	})
 
 	resp := &api.ChartDataResponse{
-		Data:  &respArray,
-		Total: utils.Ptr(int64(len(respArray))),
+		Data:  respArray,
+		Total: int64(len(respArray)),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)
@@ -126,7 +126,7 @@ func filterRoundStatsByDate(data []*repo.RoundWithStats, fromDate time.Time) []*
 }
 
 func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, params api.GetPieChartAveragesParams) {
-	userId := uhttp.UserIdFromContext(r.Context())
+	userId := utils.UserIdFromContext(r.Context())
 
 	// Get the pie chart data.
 	userRounds, err := s.r.GetUserHitStats(userId)
@@ -181,8 +181,8 @@ func (s *service) GetPieChartAverages(w http.ResponseWriter, r *http.Request, pa
 	}
 
 	resp := &api.ChartDataResponse{
-		Data:  &respArray,
-		Total: utils.Ptr(int64(len(respArray))),
+		Data:  respArray,
+		Total: int64(len(respArray)),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

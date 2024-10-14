@@ -10,14 +10,16 @@ import (
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
 	repo "github.com/Jacobbrewer1/golf-stats-tracker/pkg/repositories/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/vault"
+	"github.com/Jacobbrewer1/uhttp"
+	"github.com/Jacobbrewer1/vaulty"
+	"github.com/spf13/viper"
 )
 
 type authz struct {
 	next api.ServerInterface
 	db   repo.Repository
-	vc   vault.Client
+	vc   vaulty.Client
+	vip  *viper.Viper
 }
 
 func (a *authz) GetPieChartAverages(w http.ResponseWriter, r *http.Request, params api.GetPieChartAveragesParams) {
@@ -127,11 +129,12 @@ func (a *authz) CreateUser(w http.ResponseWriter, r *http.Request) {
 	a.next.CreateUser(w, r)
 }
 
-func NewAuthz(next api.ServerInterface, db repo.Repository, vc vault.Client) api.ServerInterface {
+func NewAuthz(next api.ServerInterface, db repo.Repository, vc vaulty.Client, vip *viper.Viper) api.ServerInterface {
 	return &authz{
 		next: next,
 		db:   db,
 		vc:   vc,
+		vip:  vip,
 	}
 }
 
@@ -146,7 +149,10 @@ func (a *authz) WithAuthorization(r *http.Request) (*http.Request, error) {
 		return nil, fmt.Errorf("failed to get user by username: %w", err)
 	}
 
-	unvaultedPassword, err := a.vc.TransitDecrypt(r.Context(), user.Password)
+	unvaultedPassword, err := a.vc.Path(
+		a.vip.GetString("vault.transit.key"),
+		vaulty.WithPrefix(a.vip.GetString("vault.transit.name")),
+	).TransitDecrypt(r.Context(), user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decrypt password: %w", err)
 	}
@@ -155,7 +161,7 @@ func (a *authz) WithAuthorization(r *http.Request) (*http.Request, error) {
 		return nil, errors.New("invalid password")
 	}
 
-	r = r.WithContext(uhttp.UserIdToContext(r.Context(), user.Id))
+	r = r.WithContext(utils.UserIdToContext(r.Context(), user.Id))
 
 	return r, nil
 }

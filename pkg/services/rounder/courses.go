@@ -9,8 +9,7 @@ import (
 
 	api "github.com/Jacobbrewer1/golf-stats-tracker/pkg/codegen/apis/rounder"
 	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/logging"
-	"github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils"
-	uhttp "github.com/Jacobbrewer1/golf-stats-tracker/pkg/utils/http"
+	"github.com/Jacobbrewer1/uhttp"
 )
 
 func (s *service) GetNewRoundCourses(w http.ResponseWriter, r *http.Request, params api.GetNewRoundCoursesParams) {
@@ -84,7 +83,7 @@ func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, cour
 	}
 
 	details := make([]api.CourseDetails, 0)
-	details = append(details, *marker.Details...)
+	details = append(details, marker.Details...)
 
 	for i := range details {
 		details[i].Holes = nil
@@ -98,8 +97,8 @@ func (s *service) GetNewRoundMarker(w http.ResponseWriter, r *http.Request, cour
 	})
 
 	resp := &api.CourseDetailsResponse{
-		Details: &details,
-		Total:   utils.Ptr(int64(len(details))),
+		Details: details,
+		Total:   int64(len(details)),
 	}
 
 	err = uhttp.Encode(w, http.StatusOK, resp)

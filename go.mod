@@ -1,25 +1,23 @@
 module github.com/Jacobbrewer1/golf-stats-tracker
 
-go 1.22
+go 1.23
+
+toolchain go1.23.2
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.2
+	github.com/Jacobbrewer1/uhttp v0.0.2
+	github.com/Jacobbrewer1/vaulty v0.1.2
 	github.com/alexliesenfeld/health v0.8.0
-	github.com/go-sql-driver/mysql v1.8.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/subcommands v1.2.0
 	github.com/gorilla/mux v1.8.1
-	github.com/hashicorp/vault/api v1.15.0
-	github.com/hashicorp/vault/api/auth/approle v0.8.0
-	github.com/hashicorp/vault/api/auth/userpass v0.8.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/prometheus/client_golang v1.20.3
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.9.0
-	github.com/vektra/mockery/v2 v2.45.0
+	github.com/vektra/mockery/v2 v2.46.2
 	golang.org/x/crypto v0.27.0
-	golang.org/x/time v0.6.0
 )
 
 require (
@@ -32,7 +30,8 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.1 // indirect
-	github.com/google/uuid v1.5.0 // indirect
+	github.com/go-sql-driver/mysql v1.8.1 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
@@ -42,6 +41,9 @@ require (
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/hashicorp/vault/api v1.15.0 // indirect
+	github.com/hashicorp/vault/api/auth/approle v0.8.0 // indirect
+	github.com/hashicorp/vault/api/auth/userpass v0.8.0 // indirect
 	github.com/huandu/xstrings v1.4.0 // indirect
 	github.com/iancoleman/strcase v0.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -78,6 +80,7 @@ require (
 	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/term v0.24.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
+	golang.org/x/time v0.7.0 // indirect
 	golang.org/x/tools v0.21.1-0.20240508182429-e35e4ccd0d2d // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect

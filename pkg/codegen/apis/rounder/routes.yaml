@@ -45,7 +45,6 @@ paths:
     post:
       summary: Login
       operationId: login
-      x-unauthenticated: true
       requestBody:
         required: true
         content:
@@ -437,6 +436,9 @@ components:
   schemas:
     chart_data_response:
       type: object
+      required:
+        - data
+        - total
       properties:
         data:
           type: array
@@ -526,6 +528,9 @@ components:
 
     rounds_response:
       type: object
+      required:
+        - rounds
+        - total
       properties:
         rounds:
           type: array
@@ -582,6 +587,9 @@ components:
 
     courses_response:
       type: object
+      required:
+        - courses
+        - total
       properties:
         courses:
           type: array
@@ -594,6 +602,10 @@ components:
 
     course:
       type: object
+      required:
+        - id
+        - name
+        - details
       properties:
         id:
           type: integer
@@ -609,6 +621,9 @@ components:
 
     course_details_response:
       type: object
+      required:
+        - details
+        - total
       properties:
         details:
           type: array
@@ -621,6 +636,9 @@ components:
 
     course_details:
       type: object
+      required:
+        - id
+        - holes
       properties:
         id:
           type: integer
@@ -680,6 +698,9 @@ components:
 
     holes_response:
       type: object
+      required:
+        - holes
+        - total
       properties:
         holes:
           type: array
